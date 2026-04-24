@@ -12,17 +12,16 @@ st.markdown("Bist auch Du überwältigt von der Auswahl verschiedener Reiseziele
 st.write("Folgende Kriterien stehen zur Auswahl:")
 
 st.write("Temperatur")
-temperature = st.slider("Bitte gib deine gewünschte Temperatur am Reiseziel ein: ", -20, 40, 0)
+temperature = st.slider("Bitte gib deine gewünschte Temperatur am Reiseziel ein: ", -30, 40, 0)
 
 st.write("Sicherheit")
-safety = st.slider("Bitte gib deine gewünschte Sicherheit (1) am Reiseziel ein:", 1, 10, 1)
-st.write("(1) Gemessen anhand Global Safety Indey gemäss XYZ")
+safety = st.slider("Bitte gib deine gewünschte Sicherheit am Reiseziel ein:", 1, 10, 1)
 
 st.write("Flugzeit")
 flighttime = st.slider("Bitte gib deine gewünschte Flugzeit von Zürich in Stunden ein: ",0, 5, 0)
 
 st.write("Budget")
-budget = st.number_input("Bitte gib dein gewünschtes Budget für die Reise ein:", min_value = 0, step = 1)
+budget = st.number_input("Bitte gib dein gewünschtes Budget für die Reise ein:", min_value = 0, step = 100)
 
 st.write("Reisezeitraum")
 trip_start = st.date_input("Bitte gib dein gewünschten Startzeitpunkt ein:")
