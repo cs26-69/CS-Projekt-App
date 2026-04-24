@@ -22,7 +22,7 @@ st.write("Flugzeit")
 flighttime = st.slider("Bitte gib deine gewünschte Flugzeit von Zürich in Stunden ein: ",0, 5, 0)
 
 st.write("Budget")
-budget = st.number_input("Bitte gib dein gewünschtes Budget für die Reise ein:", min_value = 0, step = 1
+budget = st.number_input("Bitte gib dein gewünschtes Budget für die Reise ein:", min_value = 0, step = 1)
 
 st.write("Reisezeitraum")
 trip_start = st.date_input("Bitte gib dein gewünschten Startzeitpunkt ein:")
@@ -40,4 +40,4 @@ st.write("Du hast folgende Inputfaktoren gewählt: ")
 for key, value in trip.items():
     st.markdown(f"**{key}:** {value}")
 
-st.title("Test, ob diese Kacke funktioniert ")
+st.title("Test, ob diese Kacke funktioniert")
