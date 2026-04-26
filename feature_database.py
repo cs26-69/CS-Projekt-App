@@ -9,7 +9,7 @@ safety_schwellen = {
     5: 1.1,
 }
 
-csv_pfad = "/Users/benjaminduscio/Documents/HSG/BBWL/S6/Informatik/Projekt/Database CSV.csv"
+csv_pfad = "X"
 
 def filter_destinations(category, safety, flighttime, budget, trip_duration, flight_cost):
 
