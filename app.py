@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import date
-from feature_database import filter_destinations
+from Feature_Database import filter_destinations
 
 st.title("FitMyTrip")
 
