@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 #User Input von Safety muss invertiert werden und wird anhand der Index-Werte in Quartile unterteilt
 safety_schwellen = {
@@ -9,7 +10,7 @@ safety_schwellen = {
     5: 1.1,
 }
 
-csv_pfad = "X"
+csv_pfad = Path(__file__).parent / "Destinations_Database.csv"
 
 def filter_destinations(category, safety, flighttime, budget, trip_duration, flight_cost):
 
@@ -30,7 +31,7 @@ def filter_destinations(category, safety, flighttime, budget, trip_duration, fli
 
     daily_budget = (budget - flight_cost) / trip_duration
 
-    df = pd.read_csv(csv_pfad, encoding="mac-roman")
+    df = pd.read_csv(csv_pfad, encoding="utf-8")
     df_copy = df.copy()
 
     #Filterung der CSV Datei gemäss User-Inputs
