@@ -39,6 +39,8 @@ def filter_destinations(category, safety, flighttime, budget, trip_duration, fli
                         & (df_copy["Sicherheitsindex"] <= safety_schwellen[safety]) 
                         & (df_copy["Tageskosten (Ø CHF)"] <= daily_budget)
                         & (df_copy["Flugzeit (ab ZRH)"] <= flighttime)]
+                        #Filter nach Temperatur (API)
+                        #Filter nach Flugpreis (API)
     return df_filtered
 
 # Test-Block: läuft nur, wenn diese Datei direkt ausgeführt wird
