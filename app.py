@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 
-from feature_database import filter_destinations
+from Feature_Database import filter_destinations
 from Feature_Temperatur_API import hole_durchschnittstemperatur
 from Feature_Tagespreise_API import hole_tageskosten
 
