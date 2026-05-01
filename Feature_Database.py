@@ -12,7 +12,7 @@ safety_schwellen = {
 
 csv_pfad = Path(__file__).parent / "Destinations_Database.csv"
 
-def filter_destinations(category, safety, flighttime, budget, trip_duration, flight_cost):
+def filter_destinations(category, safety, flighttime, budget, trip_duration):
 
     """
     Filtert Destinationen nach den User-Parametern.
@@ -23,22 +23,22 @@ def filter_destinations(category, safety, flighttime, budget, trip_duration, fli
         flighttime (float): maximale Flugzeit in Stunden
         budget (float): Gesamtbudget in CHF
         trip_duration (int): Reisedauer in Tagen
-        flight_cost (float): Flugkosten in CHF (von API)
     
     Returns:
         pd.DataFrame: Gefilterte Destinationen
     """
 
-    daily_budget = (budget - flight_cost) / trip_duration
-
     df = pd.read_csv(csv_pfad, encoding="utf-8")
     df_copy = df.copy()
+
+    df_copy["daily_budget"] = (budget - df_copy["Flugpreise"]) / trip_duration
 
     #Filterung der CSV Datei gemäss User-Inputs
     df_filtered = df_copy[(df_copy["Kategorie (Primär)"].str.contains(category)) 
                         & (df_copy["Sicherheitsindex"] <= safety_schwellen[safety]) 
-                        & (df_copy["Tageskosten (Ø CHF)"] <= daily_budget)
-                        & (df_copy["Flugzeit (ab ZRH)"] <= flighttime)]
+                        & (df_copy["Flugzeit (ab ZRH)"] <= flighttime)
+                        & (df_copy["daily_budget"] >= 0)]
+
     return df_filtered
 
 # Test-Block: läuft nur, wenn diese Datei direkt ausgeführt wird
@@ -49,7 +49,5 @@ if __name__ == "__main__":
         flighttime=2.7,
         budget=2500,
         trip_duration=3,
-        flight_cost=200,
     )
     print(ergebnis)
-
