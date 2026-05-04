@@ -14,11 +14,11 @@ TEMP_TOLERANZ = 5
 
 # Wrapper mit Streamlit-Cache, damit wir die APIs nicht jedes Mal
 # neu aufrufen muessen wenn sich an den Inputs nichts geaendert hat.
-# Wichtig vor allem bei der Temperatur-API: pro Stadt sind 5 HTTP-Calls
+# Wichtig vor allem bei der Temperatur-API: pro Destination sind 5 HTTP-Calls
 # noetig (einer pro Vorjahr), das wuerde sonst jedes Mal lange dauern.
 @st.cache_data(show_spinner=False)
-def get_temperatur_cached(stadt, start_str, end_str):
-    return hole_durchschnittstemperatur(stadt, start_str, end_str)
+def get_temperatur_cached(destination, start_str, end_str):
+    return hole_durchschnittstemperatur(destination, start_str, end_str)
 
 @st.cache_data(show_spinner=False)
 def get_tageskosten_cached(land):
@@ -102,9 +102,9 @@ if st.button("Reiseziele finden"):
         )
 
         # Pruefen ob die Spalten da sind, die wir fuer die APIs brauchen.
-        # Stadt -> Temperatur-API, Land -> Tageskosten-API, Flugpreise -> Gesamtkosten
+        # Destination -> Temperatur-API, Land -> Tageskosten-API, Flugpreise -> Gesamtkosten
         if len(ergebnis) > 0:
-            for col in ("Stadt", "Land", "Flugpreise"):
+            for col in ("Destination", "Land", "Flugpreise"):
                 if col not in ergebnis.columns:
                     st.error(f"Die Spalte '{col}' fehlt in der Datenbank.")
                     st.stop()
@@ -122,7 +122,7 @@ if st.button("Reiseziele finden"):
                 temperaturen = []
                 tageskosten = []
                 for _, row in ergebnis.iterrows():
-                    temperaturen.append(get_temperatur_cached(row["Stadt"], start_str, end_str))
+                    temperaturen.append(get_temperatur_cached(row["Destination"], start_str, end_str))
                     tageskosten.append(get_tageskosten_cached(row["Land"]))
 
                 ergebnis["Erwartete Temperatur (°C)"] = temperaturen
