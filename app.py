@@ -183,7 +183,7 @@ with tab_input:
     )
 
     safety = st.slider(
-        "Bitte gib dein gewünschtes Sicherheitsniveau am Reiseziel ein:",
+        "Bitte gib dein gewünschtes Sicherheitsniveau am Reiseziel ein: (von 1 tiefe Sicherheit bis 5 höchste Sicherheit)",
         1, 5, 1,
     )
 
