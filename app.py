@@ -365,24 +365,55 @@ with tab_ergebnis:
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
-        # CHART 2: Radar-Chart - Profilvergleich (Match-Profil des Top-Ziels)
+  # CHART 2: Radar-Chart - Vergleich Wunschprofil vs. empfohlene Destination
         with col2:
-            st.subheader(f"Profilvergleich: {top['Destination']}")
+            st.subheader(f"Profilvergleich: Wunsch vs. {top['Destination']}")
 
             kategorien = ["Temperatur", "Tagespreise", "Sicherheit", "Flugzeit"]
+
+            # Wunsch-Profil: per Definition immer 100% auf jeder Achse,
+            # weil das der "perfekte Match" waere - also genau das, was
+            # der User in den Kriterien eingegeben hat.
+            wunsch_werte = [100, 100, 100, 100]
+
+            # Tatsaechliches Profil der empfohlenen Destination
             ziel_werte = [top["Temperatur"], top["Tagespreise"], top["Sicherheit"], top["Flugzeit"]]
 
             fig_radar = go.Figure()
+
+            # Erste Flaeche: Wunsch (blau, halbtransparent).
+            # Wir haengen jeweils das erste Element am Ende nochmal an,
+            # damit das Polygon im Radar-Chart sauber geschlossen wird.
+            fig_radar.add_trace(go.Scatterpolar(
+                r=wunsch_werte + [wunsch_werte[0]],
+                theta=kategorien + [kategorien[0]],
+                fill="toself",
+                name="Dein Wunsch",
+                line=dict(color="#3b82f6", width=2),
+                fillcolor="rgba(59, 130, 246, 0.25)",  # blau, transparent
+            ))
+
+            # Zweite Flaeche: empfohlene Destination (gruen, halbtransparent).
+            # Wo diese Flaeche kleiner ist als die blaue, gibt es Abweichungen
+            # vom Wunsch. Bei einem perfekten Match wuerden sich beide
+            # Polygone genau decken.
             fig_radar.add_trace(go.Scatterpolar(
                 r=ziel_werte + [ziel_werte[0]],
                 theta=kategorien + [kategorien[0]],
                 fill="toself",
                 name=top["Destination"],
-                line_color="#2d8a3e",
+                line=dict(color="#2d8a3e", width=2),
+                fillcolor="rgba(45, 138, 62, 0.4)",   # gruen, transparent
             ))
+
             fig_radar.update_layout(
                 polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-                showlegend=False,
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom", y=-0.15,
+                    xanchor="center", x=0.5,
+                ),
                 height=450,
             )
             st.plotly_chart(fig_radar, use_container_width=True)
