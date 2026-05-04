@@ -177,6 +177,59 @@ def hole_durchschnittstemperatur(ort, start_datum, end_datum):
     return round(durchschnitt, 1)
 
 
+    # Neue Funktion fuer das Liniendiagramm bei der Ergebnis Ausgabe (Finales Ergebnis mit Verlauf von Temperatur)
+def hole_temperaturen_pro_jahr(ort, start_datum, end_datum):
+    # Macht im Prinzip dasselbe wie hole_durchschnittstemperatur(),
+    # aber gibt die Werte pro Jahr separat zurueck statt sie zu einem
+    # einzigen Mittelwert zusammenzufassen.
+    # Das brauche ich fuers Liniendiagramm in der App, damit man die
+    # Entwicklung ueber die letzten Jahre sehen kann.
+
+    koordinaten = finde_koordinaten(ort)
+    if koordinaten is None:
+        return None
+
+    start = datetime.strptime(start_datum, "%d.%m.%Y").date()
+    ende = datetime.strptime(end_datum, "%d.%m.%Y").date()
+    heute = date.today()
+
+    # Hier sammle ich pro Jahr einen Eintrag, statt alles in einer
+    # Liste zusammenzuwerfen
+    pro_jahr = {}
+
+    for n in range(1, ANZAHL_JAHRE + 1):
+        referenz_jahr = heute.year - n
+
+        try:
+            hist_start = start.replace(year=referenz_jahr)
+            hist_ende = ende.replace(year=referenz_jahr)
+        except ValueError:
+            # 29. Februar in einem Nicht-Schaltjahr -> auf den 28. ausweichen
+            hist_start = start.replace(year=referenz_jahr, day=28)
+            hist_ende = ende.replace(year=referenz_jahr, day=28)
+
+        params = {
+            "latitude": koordinaten["lat"],
+            "longitude": koordinaten["lon"],
+            "start_date": hist_start.strftime("%Y-%m-%d"),
+            "end_date": hist_ende.strftime("%Y-%m-%d"),
+            "daily": "temperature_2m_mean",
+            "timezone": "auto"
+        }
+
+        antwort = requests.get(ARCHIV_URL, params=params)
+        daten = antwort.json()
+
+        if "daily" not in daten:
+            continue
+
+        # None-Werte rausfiltern und Mittelwert nur fuer dieses eine Jahr bilden
+        werte = [t for t in daten["daily"]["temperature_2m_mean"] if t is not None]
+        if werte:
+            pro_jahr[referenz_jahr] = round(sum(werte) / len(werte), 1)
+
+    return pro_jahr if pro_jahr else None
+
 # ============================================================
 # Testblock
 # ============================================================
