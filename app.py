@@ -17,6 +17,13 @@ from Feature_Tagespreise_API import hole_tageskosten
 TEMP_TOLERANZ = 5
 LOGO_PATH = "logo.png"
 
+# Mapping fuer die Monatsnamen auf der x-Achse beim Liniendiagramm
+MONATSNAMEN = {
+    1: "Januar", 2: "Februar", 3: "März", 4: "April",
+    5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
+    9: "September", 10: "Oktober", 11: "November", 12: "Dezember",
+}
+
 # Wide-Layout, damit die zwei Charts auf der Auswertungs-Seite
 # nebeneinander Platz haben
 st.set_page_config(page_title="FitMyTrip", layout="wide", page_icon=LOGO_PATH)
@@ -54,7 +61,7 @@ def get_temperaturen_pro_jahr_cached(destination, start_str, end_str):
 
 
 # --- Match-Score-Logik ------------------------------------------------------
-def berechne_scores(row, wunsch_temp, budget):
+def berechne_scores(row, wunsch_temp, budget, trip_duration_days):
     # Berechnet pro Reiseziel vier Einzelscores (jeweils 0-100%) und
     # daraus einen gleichgewichteten Gesamt-Match-Score.
     #
@@ -65,9 +72,21 @@ def berechne_scores(row, wunsch_temp, budget):
     temp_diff = abs(row["Erwartete Temperatur (°C)"] - wunsch_temp)
     temp_score = max(0, 1 - temp_diff / 15)
 
-    # Budget: Wer das Budget komplett ausreizt, kriegt 0%.
-    # Wer guenstig wegkommt, kriegt mehr Punkte.
-    budget_score = max(0, 1 - row["Geschätzte Gesamtkosten (CHF)"] / budget)
+    # Tagespreise vs. erlaubtes Tagesbudget:
+    # Budget durch Reisetage geteilt = wieviel pro Tag verfuegbar waere.
+    # Wenn die echten Tageskosten darunter liegen -> guter Match (=1.0).
+    # Wenn sie genau gleich sind -> mittlerer Match (~0.5).
+    # Wenn sie deutlich drueber liegen -> schlechter Match (gegen 0).
+    #
+    # Konkrete Formel: 1 - (Tageskosten / erlaubtes Tagesbudget) / 2
+    # Beispiele bei 100 CHF erlaubtem Tagesbudget:
+    #   Tageskosten 0   -> Score 1.00 (gratis)
+    #   Tageskosten 50  -> Score 0.75 (halb so teuer wie erlaubt)
+    #   Tageskosten 100 -> Score 0.50 (genau am Limit)
+    #   Tageskosten 200 -> Score 0.00 (doppelt so teuer wie erlaubt)
+    erlaubtes_tagesbudget = budget / trip_duration_days
+    verhaeltnis = row["Tageskosten (CHF)"] / erlaubtes_tagesbudget
+    budget_score = max(0, min(1, 1 - verhaeltnis / 2))
 
     # Sicherheit: in der CSV ist niedriger = sicherer (skaliert 0-5)
     safety_score = max(0, 1 - row["Sicherheitsindex"] / 5)
@@ -80,7 +99,7 @@ def berechne_scores(row, wunsch_temp, budget):
 
     return {
         "Temperatur": round(temp_score * 100, 1),
-        "Budget": round(budget_score * 100, 1),
+        "Tagespreise": round(budget_score * 100, 1),
         "Sicherheit": round(safety_score * 100, 1),
         "Flugzeit": round(flight_score * 100, 1),
         "Match-Score (%)": round(gesamt * 100, 1),
@@ -93,7 +112,6 @@ def zeige_lade_animation(platzhalter, text="Suche passende Reiseziele..."):
     # Wird in einem st.empty()-Platzhalter angezeigt, damit es nach dem
     # Laden wieder ausgeblendet werden kann (mit platzhalter.empty()).
     if logo_b64 is None:
-        # Fallback falls Logo-Datei fehlt
         platzhalter.info(text)
         return
 
@@ -176,7 +194,6 @@ with tab_input:
         placeholder="Bitte wählen",
     )
 
-    # Mapping vom Label zur Stundenzahl, damit damit gerechnet werden kann
     flighttime_mapping = {
         "weniger als 1.5 Stunden": 1.5,
         "1.5 bis 3 Stunden": 3.0,
@@ -192,8 +209,7 @@ with tab_input:
     trip_end = st.date_input("Bitte gib deinen gewünschten Endzeitpunkt ein:")
     trip_duration_days = (trip_end - trip_start).days
 
-    # Platzhalter fuer die Lade-Animation. Wird mit dem Logo gefuellt,
-    # waehrend die APIs laufen, und nach dem Laden wieder geleert.
+    # Platzhalter fuer die Lade-Animation
     lade_platzhalter = st.empty()
 
     if st.button("Reiseziele finden"):
@@ -207,7 +223,6 @@ with tab_input:
         elif budget <= 0:
             st.error("Bitte gib ein Budget grösser als 0 ein.")
         else:
-            # Lade-Animation einblenden
             zeige_lade_animation(lade_platzhalter, "Suche passende Reiseziele...")
 
             # Erst die statischen Kriterien aus der Datenbank filtern.
@@ -222,8 +237,6 @@ with tab_input:
             )
 
             if len(ergebnis) > 0:
-                # Sicherstellen, dass die noetigen Spalten vorhanden sind.
-                # Destination -> Wetter-API, Land -> Tageskosten-API.
                 for col in ("Destination", "Land", "Flugpreise"):
                     if col not in ergebnis.columns:
                         lade_platzhalter.empty()
@@ -234,7 +247,6 @@ with tab_input:
                 start_str = trip_start.strftime("%d.%m.%Y")
                 end_str = trip_end.strftime("%d.%m.%Y")
 
-                # Pro Zeile beide APIs aufrufen
                 temperaturen, tageskosten = [], []
                 for _, row in ergebnis.iterrows():
                     temperaturen.append(get_temperatur_cached(row["Destination"], start_str, end_str))
@@ -243,7 +255,6 @@ with tab_input:
                 ergebnis["Erwartete Temperatur (°C)"] = temperaturen
                 ergebnis["Tageskosten (CHF)"] = tageskosten
 
-                # Gesamtkosten = Flugpreise + Tageskosten * Reisedauer
                 ergebnis["Geschätzte Gesamtkosten (CHF)"] = ergebnis.apply(
                     lambda r: None
                     if pd.isna(r["Tageskosten (CHF)"]) or pd.isna(r["Flugpreise"])
@@ -261,25 +272,25 @@ with tab_input:
                     (ergebnis["Erwartete Temperatur (°C)"] >= temperature - TEMP_TOLERANZ)
                     & (ergebnis["Erwartete Temperatur (°C)"] <= temperature + TEMP_TOLERANZ)
                 ]
-                # Budget-Match
+                # Budget-Match (gesamtes Reisebudget)
                 ergebnis = ergebnis[ergebnis["Geschätzte Gesamtkosten (CHF)"] <= budget]
 
-                # Match-Scores berechnen und an DataFrame anhaengen
+                # Match-Scores berechnen
                 if len(ergebnis) > 0:
                     scores_df = ergebnis.apply(
-                        lambda r: pd.Series(berechne_scores(r, temperature, budget)),
+                        lambda r: pd.Series(berechne_scores(r, temperature, budget, trip_duration_days)),
                         axis=1,
                     )
                     ergebnis = pd.concat([ergebnis, scores_df], axis=1)
                     ergebnis = ergebnis.sort_values("Match-Score (%)", ascending=False).reset_index(drop=True)
 
-            # Lade-Animation wieder ausblenden
             lade_platzhalter.empty()
 
             # Alles in den session_state legen, damit Tab 2 zugreifen kann
             st.session_state["ergebnis"] = ergebnis
             st.session_state["wunsch_temp"] = temperature
             st.session_state["budget"] = budget
+            st.session_state["trip_start"] = trip_start
             st.session_state["trip_start_str"] = trip_start.strftime("%d.%m.%Y")
             st.session_state["trip_end_str"] = trip_end.strftime("%d.%m.%Y")
 
@@ -295,42 +306,37 @@ with tab_input:
 with tab_ergebnis:
     zeige_logo_header()
 
-    # Wenn der User direkt auf Tab 2 klickt, ohne vorher gesucht zu haben
     if "ergebnis" not in st.session_state:
         st.info("Bitte zuerst im Tab **Kriterien** Reiseziele suchen.")
     elif len(st.session_state["ergebnis"]) == 0:
         st.warning("Es wurden keine Reiseziele gefunden, die zu deinen Kriterien passen.")
     else:
-        # Daten aus dem session_state holen
         ergebnis = st.session_state["ergebnis"]
         wunsch_temp = st.session_state["wunsch_temp"]
+        trip_start = st.session_state["trip_start"]
         start_str = st.session_state["trip_start_str"]
         end_str = st.session_state["trip_end_str"]
 
         st.title("Reiseziel-Finder – Deine persönliche Auswertung")
 
-        # Top-Empfehlung = erstes Element (oben absteigend sortiert)
         top = ergebnis.iloc[0]
         st.success(
             f"Dein bestes Match: **{top['Destination']}** ({top['Land']}) "
             f"mit {top['Match-Score (%)']}% Übereinstimmung"
         )
 
-        # --- Charts nebeneinander -----------------------------------------
         col1, col2 = st.columns(2)
 
         # CHART 1: Bar-Chart Ranking
         with col1:
             st.subheader("Reiseziel-Ranking")
 
-            # Farb-Mapping je nach Score-Stufe
             def farbe(score):
-                if score >= 80:  return "#2d8a3e"   # sehr gut: dunkelgruen
-                if score >= 65:  return "#7bbf6a"   # gut: hellgruen
-                if score >= 50:  return "#e8b84a"   # mittel: gelb
-                return "#d65555"                    # schwach: rot
+                if score >= 80:  return "#2d8a3e"
+                if score >= 65:  return "#7bbf6a"
+                if score >= 50:  return "#e8b84a"
+                return "#d65555"
 
-            # Top 10 reicht, sonst wird der Chart unuebersichtlich
             top10 = ergebnis.head(10)
             fig_bar = px.bar(
                 top10,
@@ -343,26 +349,30 @@ with tab_ergebnis:
                 marker_color=[farbe(s) for s in top10["Match-Score (%)"]],
                 texttemplate="%{text:.1f}%",
                 textposition="outside",
+                # Balken duenner: width steuert die Balkendicke (0-1).
+                # Standard ist ~0.8, mit 0.4 werden sie deutlich schmaler.
+                width=0.4,
             )
             fig_bar.update_layout(
-                yaxis={"categoryorder": "total ascending"},  # bestes Ziel oben
+                yaxis={"categoryorder": "total ascending"},
                 xaxis_title="Übereinstimmung mit deinen Präferenzen (%)",
                 yaxis_title="",
                 showlegend=False,
                 height=450,
+                # Mehr Abstand zwischen den Balken, damit die schmalen
+                # Balken nicht zu eng aneinander kleben
+                bargap=0.5,
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
-        # CHART 2: Radar-Chart - Match-Profil des Top-Reiseziels
+        # CHART 2: Radar-Chart - Profilvergleich (Match-Profil des Top-Ziels)
         with col2:
-            st.subheader(f"Match-Profil: {top['Destination']}")
+            st.subheader(f"Profilvergleich: {top['Destination']}")
 
-            kategorien = ["Temperatur", "Budget", "Sicherheit", "Flugzeit"]
-            ziel_werte = [top["Temperatur"], top["Budget"], top["Sicherheit"], top["Flugzeit"]]
+            kategorien = ["Temperatur", "Tagespreise", "Sicherheit", "Flugzeit"]
+            ziel_werte = [top["Temperatur"], top["Tagespreise"], top["Sicherheit"], top["Flugzeit"]]
 
             fig_radar = go.Figure()
-            # Trick: erste Kategorie am Ende nochmal anhaengen,
-            # damit das Polygon geschlossen wird
             fig_radar.add_trace(go.Scatterpolar(
                 r=ziel_werte + [ziel_werte[0]],
                 theta=kategorien + [kategorien[0]],
@@ -377,11 +387,12 @@ with tab_ergebnis:
             )
             st.plotly_chart(fig_radar, use_container_width=True)
 
-        # CHART 3: Liniendiagramm Temperaturentwicklung der Top-Empfehlung.
-        # Etwas kleiner gehalten, damit es nicht zu dominant wirkt.
+        # CHART 3: Liniendiagramm Temperaturentwicklung der Top-Empfehlung
+        # X-Achse zeigt den Reisemonat plus Jahr (z.B. "August 2021").
+        reise_monat_name = MONATSNAMEN[trip_start.month]
         st.subheader(
-            f"Temperaturentwicklung in {top['Destination']} "
-            f"(gleicher Reisezeitraum, letzte Jahre)"
+            f"Temperaturentwicklung in {top['Destination']} im {reise_monat_name} "
+            f"(letzte Jahre)"
         )
 
         with st.spinner("Lade historische Temperaturdaten..."):
@@ -392,22 +403,25 @@ with tab_ergebnis:
         if temp_history is None or len(temp_history) == 0:
             st.warning("Keine historischen Temperaturdaten verfügbar.")
         else:
-            # Jahre aufsteigend sortieren (aelteste links, neueste rechts)
             jahre = sorted(temp_history.keys())
             werte = [temp_history[j] for j in jahre]
+            # X-Achsen-Labels: Monatsname + Jahr (z.B. "August 2021")
+            labels = [f"{reise_monat_name} {j}" for j in jahre]
 
             fig_line = go.Figure()
             fig_line.add_trace(go.Scatter(
-                x=jahre,
+                x=labels,
                 y=werte,
                 mode="lines+markers+text",
                 text=[f"{w}°C" for w in werte],
                 textposition="top center",
+                # Schriftgroesse der Datenbeschriftungen leicht erhoeht
+                # damit die Zahlen besser lesbar sind
+                textfont=dict(size=13, color="#333"),
                 line=dict(color="#3b82f6", width=3),
                 marker=dict(size=10),
                 name="Ø Temperatur",
             ))
-            # Wunsch-Temperatur als horizontale Referenzlinie
             fig_line.add_hline(
                 y=wunsch_temp,
                 line_dash="dash",
@@ -415,18 +429,29 @@ with tab_ergebnis:
                 annotation_text=f"Dein Wunsch: {wunsch_temp}°C",
                 annotation_position="right",
             )
+
+            # Y-Achsen-Bereich manuell setzen, damit oben Platz fuer die
+            # Datenbeschriftungen bleibt und nichts abgeschnitten wird.
+            # Ich nehme min/max der Werte und gebe oben/unten je 3 Grad
+            # Puffer (mit Wunsch-Temperatur als zusaetzlicher Referenz).
+            alle_y_werte = werte + [wunsch_temp]
+            y_min = min(alle_y_werte) - 3
+            y_max = max(alle_y_werte) + 4   # oben etwas mehr Puffer fuer Labels
+
             fig_line.update_layout(
-                xaxis_title="Jahr",
+                xaxis_title="",
                 yaxis_title="Durchschnittstemperatur (°C)",
-                height=300,
+                height=350,
+                yaxis=dict(range=[y_min, y_max]),
+                # margin oben erhoehen, damit der oberste Datenpunkt-Text
+                # nicht von der Plot-Grenze abgeschnitten wird
+                margin=dict(t=40, b=40, l=40, r=40),
             )
 
-            # In zwei Spalten packen, damit das Diagramm nur die linke Haelfte
-            # fuellt und nicht so dominant wirkt
             col_links, col_rechts = st.columns([2, 1])
             with col_links:
                 st.plotly_chart(fig_line, use_container_width=True)
 
-        # Tabelle als Backup, falls jemand die Rohdaten sehen will
         with st.expander("Alle Reiseziele als Tabelle anzeigen"):
             st.dataframe(ergebnis, use_container_width=True)
+            
