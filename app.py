@@ -17,12 +17,25 @@ from Feature_Tagespreise_API import hole_tageskosten
 TEMP_TOLERANZ = 5
 LOGO_PATH = "logo.png"
 
+# Pfad zur CSV - die brauchen wir auch hier, um die Beschreibung der
+# empfohlenen Destination auf der Auswertungs-Seite anzeigen zu koennen.
+# Feature_Database.py liefert nur die gefilterten Zeilen, aber wir wollen
+# auch die Beschreibung mitgeben, also lesen wir hier die Original-CSV
+# einmal ein.
+CSV_PFAD = Path(__file__).parent / "Destinations_Database.csv"
+
 # Mapping fuer die Monatsnamen auf der x-Achse beim Liniendiagramm
 MONATSNAMEN = {
     1: "Januar", 2: "Februar", 3: "März", 4: "April",
     5: "Mai", 6: "Juni", 7: "Juli", 8: "August",
     9: "September", 10: "Oktober", 11: "November", 12: "Dezember",
 }
+
+# Farben - zentral definiert, damit das Layout konsistent bleibt
+FARBE_TOP = "#2d8a3e"        # Gruen fuer das beste Match
+FARBE_REST = "#555555"       # Dunkelgrau fuer alle anderen Eintraege
+FARBE_WUNSCH = "#2d8a3e"     # Wunschprofil im Radar (gruen)
+FARBE_DESTINATION = "#555555"  # Destination im Radar (dunkelgrau)
 
 # Wide-Layout, damit die zwei Charts auf der Auswertungs-Seite
 # nebeneinander Platz haben
@@ -41,6 +54,21 @@ def get_logo_base64():
         return base64.b64encode(f.read()).decode()
 
 logo_b64 = get_logo_base64()
+
+
+# --- Beschreibungen aus der CSV laden ---------------------------------------
+# Damit ich auf der Auswertungs-Seite die Beschreibung der empfohlenen
+# Destination anzeigen kann, lade ich die CSV einmal komplett und cache
+# das Ergebnis. Spart bei jedem Rerun das wiederholte Einlesen.
+@st.cache_data
+def lade_beschreibungen():
+    if not CSV_PFAD.exists():
+        return {}
+    df = pd.read_csv(CSV_PFAD, encoding="utf-8")
+    if "Beschreibung" not in df.columns:
+        return {}
+    # Dictionary: Destination-Name -> Beschreibungstext
+    return dict(zip(df["Destination"], df["Beschreibung"]))
 
 
 # --- Cached API-Wrapper -----------------------------------------------------
@@ -72,18 +100,7 @@ def berechne_scores(row, wunsch_temp, budget, trip_duration_days):
     temp_diff = abs(row["Erwartete Temperatur (°C)"] - wunsch_temp)
     temp_score = max(0, 1 - temp_diff / 15)
 
-    # Tagespreise vs. erlaubtes Tagesbudget:
-    # Budget durch Reisetage geteilt = wieviel pro Tag verfuegbar waere.
-    # Wenn die echten Tageskosten darunter liegen -> guter Match (=1.0).
-    # Wenn sie genau gleich sind -> mittlerer Match (~0.5).
-    # Wenn sie deutlich drueber liegen -> schlechter Match (gegen 0).
-    #
-    # Konkrete Formel: 1 - (Tageskosten / erlaubtes Tagesbudget) / 2
-    # Beispiele bei 100 CHF erlaubtem Tagesbudget:
-    #   Tageskosten 0   -> Score 1.00 (gratis)
-    #   Tageskosten 50  -> Score 0.75 (halb so teuer wie erlaubt)
-    #   Tageskosten 100 -> Score 0.50 (genau am Limit)
-    #   Tageskosten 200 -> Score 0.00 (doppelt so teuer wie erlaubt)
+    # Tagespreise vs. erlaubtes Tagesbudget
     erlaubtes_tagesbudget = budget / trip_duration_days
     verhaeltnis = row["Tageskosten (CHF)"] / erlaubtes_tagesbudget
     budget_score = max(0, min(1, 1 - verhaeltnis / 2))
@@ -108,9 +125,6 @@ def berechne_scores(row, wunsch_temp, budget, trip_duration_days):
 
 # --- Lade-Animation mit Logo ------------------------------------------------
 def zeige_lade_animation(platzhalter, text="Suche passende Reiseziele..."):
-    # Zeigt das Logo zentriert mit einer Pulsier-Animation an.
-    # Wird in einem st.empty()-Platzhalter angezeigt, damit es nach dem
-    # Laden wieder ausgeblendet werden kann (mit platzhalter.empty()).
     if logo_b64 is None:
         platzhalter.info(text)
         return
@@ -136,8 +150,6 @@ def zeige_lade_animation(platzhalter, text="Suche passende Reiseziele..."):
 
 # --- Logo-Header (kommt auf beiden Seiten) ----------------------------------
 def zeige_logo_header():
-    # Kleines Logo oben in einer der Spalten, damit es nicht die ganze
-    # Breite einnimmt und der Inhalt darunter mehr Platz hat.
     col_logo, col_text = st.columns([1, 5])
     with col_logo:
         if Path(LOGO_PATH).exists():
@@ -145,8 +157,6 @@ def zeige_logo_header():
 
 
 # --- Tabs als "Seiten" ------------------------------------------------------
-# Streamlit hat keine echte Multi-Page-Navigation eingebaut (ausser ueber
-# einen pages/-Ordner), darum nutze ich tabs als pragmatische Loesung.
 tab_input, tab_ergebnis = st.tabs(["Kriterien", "Auswertung"])
 
 
@@ -168,8 +178,6 @@ with tab_input:
     st.subheader("Kriterien Input")
     st.write("Folgende Kriterien stehen zur Auswahl:")
 
-    # Die Inputs werden in den Variablen category, temperature, safety,
-    # flighttime, budget und trip_duration abgespeichert
     category = st.selectbox(
         "Bitte wähle deine gewünschte Kategorie von Reiseziel:",
         ["Berge", "Meer", "Stadt", "Natur"],
@@ -225,9 +233,6 @@ with tab_input:
         else:
             zeige_lade_animation(lade_platzhalter, "Suche passende Reiseziele...")
 
-            # Erst die statischen Kriterien aus der Datenbank filtern.
-            # Das Budget setze ich kuenstlich hoch, weil ich gleich mit
-            # den echten Tageskosten aus der API neu rechne.
             ergebnis = filter_destinations(
                 category=category,
                 safety=safety,
@@ -286,7 +291,7 @@ with tab_input:
 
             lade_platzhalter.empty()
 
-            # Alles in den session_state legen, damit Tab 2 zugreifen kann
+            # Alles in den session_state legen
             st.session_state["ergebnis"] = ergebnis
             st.session_state["wunsch_temp"] = temperature
             st.session_state["budget"] = budget
@@ -319,25 +324,48 @@ with tab_ergebnis:
 
         st.title("Reiseziel-Finder – Deine persönliche Auswertung")
 
+        # Top-Reiseziel = erste Zeile (oben absteigend nach Score sortiert)
         top = ergebnis.iloc[0]
+
+        # Erfolgs-Banner mit Top-Match
         st.success(
             f"Dein bestes Match: **{top['Destination']}** ({top['Land']}) "
             f"mit {top['Match-Score (%)']}% Übereinstimmung"
         )
 
+        # --- Beschreibung der Top-Destination -----------------------------
+        # Holen aus dem Beschreibungs-Dictionary, das aus der CSV geladen
+        # wurde. Wenn fuer die Destination keine Beschreibung vorhanden
+        # ist (z.B. neue Destinationen, die noch nicht beschrieben sind),
+        # zeigen wir einfach nichts an statt einen Fehler zu werfen.
+        beschreibungen = lade_beschreibungen()
+        beschreibung_top = beschreibungen.get(top["Destination"])
+        if beschreibung_top:
+            st.markdown(
+                f"<div style='background-color:#f5f5f5; padding:18px 22px; "
+                f"border-left:4px solid {FARBE_TOP}; border-radius:4px; "
+                f"margin:14px 0 22px 0; font-size:15px; line-height:1.55;'>"
+                f"<strong>Über {top['Destination']}:</strong><br>"
+                f"{beschreibung_top}</div>",
+                unsafe_allow_html=True,
+            )
+
+        # --- Charts nebeneinander -----------------------------------------
         col1, col2 = st.columns(2)
 
         # CHART 1: Bar-Chart Ranking
+        # Top-Match in Gruen, alle anderen in Dunkelgrau
         with col1:
             st.subheader("Reiseziel-Ranking")
 
-            def farbe(score):
-                if score >= 80:  return "#2d8a3e"
-                if score >= 65:  return "#7bbf6a"
-                if score >= 50:  return "#e8b84a"
-                return "#d65555"
+            top10 = ergebnis.head(10).copy()
 
-            top10 = ergebnis.head(10)
+            # Farb-Liste: erstes Element (= Top-Match) gruen, Rest dunkelgrau.
+            # Die DataFrame-Reihenfolge entspricht der Sortierung nach Score
+            # absteigend, also ist Index 0 der Top-Treffer.
+            farben = [FARBE_REST] * len(top10)
+            farben[0] = FARBE_TOP
+
             fig_bar = px.bar(
                 top10,
                 x="Match-Score (%)",
@@ -346,84 +374,99 @@ with tab_ergebnis:
                 text="Match-Score (%)",
             )
             fig_bar.update_traces(
-                marker_color=[farbe(s) for s in top10["Match-Score (%)"]],
+                marker_color=farben,
                 texttemplate="%{text:.1f}%",
                 textposition="outside",
-                # Balken duenner: width steuert die Balkendicke (0-1).
-                # Standard ist ~0.8, mit 0.4 werden sie deutlich schmaler.
-                width=0.4,
+                textfont=dict(size=11, color="#333"),
+                # Sehr duenne Balken fuer ein elegantes Layout
+                width=0.25,
+                cliponaxis=False,  # damit die Beschriftung am Rand nicht abgeschnitten wird
             )
+
+            # X-Achsen-Bereich erweitern, damit die Beschriftungen rechts
+            # vom laengsten Balken vollstaendig sichtbar sind. 115 reicht
+            # auch fuer Werte um 99% (label "99.0%").
             fig_bar.update_layout(
                 yaxis={"categoryorder": "total ascending"},
                 xaxis_title="Übereinstimmung mit deinen Präferenzen (%)",
                 yaxis_title="",
+                xaxis=dict(range=[0, 115]),
                 showlegend=False,
                 height=450,
-                # Mehr Abstand zwischen den Balken, damit die schmalen
-                # Balken nicht zu eng aneinander kleben
-                bargap=0.5,
+                bargap=0.6,  # Mehr Abstand zwischen den schmalen Balken
+                margin=dict(t=20, b=40, l=10, r=30),
             )
             st.plotly_chart(fig_bar, use_container_width=True)
 
-  # CHART 2: Radar-Chart - Vergleich Wunschprofil vs. empfohlene Destination
+        # CHART 2: Radar-Chart - Profilvergleich
         with col2:
             st.subheader(f"Profilvergleich: Wunsch vs. {top['Destination']}")
 
             kategorien = ["Temperatur", "Tagespreise", "Sicherheit", "Flugzeit"]
-
-            # Wunsch-Profil: per Definition immer 100% auf jeder Achse,
-            # weil das der "perfekte Match" waere - also genau das, was
-            # der User in den Kriterien eingegeben hat.
             wunsch_werte = [100, 100, 100, 100]
-
-            # Tatsaechliches Profil der empfohlenen Destination
-            ziel_werte = [top["Temperatur"], top["Tagespreise"], top["Sicherheit"], top["Flugzeit"]]
+            ziel_werte = [
+                top["Temperatur"],
+                top["Tagespreise"],
+                top["Sicherheit"],
+                top["Flugzeit"],
+            ]
 
             fig_radar = go.Figure()
 
-            # Erste Flaeche: Wunsch (blau, halbtransparent).
-            # Wir haengen jeweils das erste Element am Ende nochmal an,
-            # damit das Polygon im Radar-Chart sauber geschlossen wird.
+            # Wunsch-Profil (gruen)
             fig_radar.add_trace(go.Scatterpolar(
                 r=wunsch_werte + [wunsch_werte[0]],
                 theta=kategorien + [kategorien[0]],
                 fill="toself",
                 name="Dein Wunsch",
-                line=dict(color="#3b82f6", width=2),
-                fillcolor="rgba(59, 130, 246, 0.25)",  # blau, transparent
+                line=dict(color=FARBE_WUNSCH, width=2),
+                fillcolor="rgba(45, 138, 62, 0.25)",
             ))
 
-            # Zweite Flaeche: empfohlene Destination (gruen, halbtransparent).
-            # Wo diese Flaeche kleiner ist als die blaue, gibt es Abweichungen
-            # vom Wunsch. Bei einem perfekten Match wuerden sich beide
-            # Polygone genau decken.
+            # Empfohlene Destination (dunkelgrau)
             fig_radar.add_trace(go.Scatterpolar(
                 r=ziel_werte + [ziel_werte[0]],
                 theta=kategorien + [kategorien[0]],
                 fill="toself",
                 name=top["Destination"],
-                line=dict(color="#2d8a3e", width=2),
-                fillcolor="rgba(45, 138, 62, 0.4)",   # gruen, transparent
+                line=dict(color=FARBE_DESTINATION, width=2),
+                fillcolor="rgba(85, 85, 85, 0.35)",
             ))
 
+            # Wichtig: domain einschraenken, damit die Achsen-Labels
+            # (Temperatur, Tagespreise, Sicherheit, Flugzeit) drumherum
+            # genug Platz haben und nicht abgeschnitten werden.
+            # x: 0.05 bis 0.95 -> 5% Rand links und rechts
+            # y: 0.18 bis 0.92 -> mehr Platz unten fuer "Flugzeit"-Label
+            #    und Legende
             fig_radar.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                polar=dict(
+                    domain=dict(x=[0.05, 0.95], y=[0.18, 0.92]),
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100],
+                        tickfont=dict(size=9),
+                    ),
+                    angularaxis=dict(tickfont=dict(size=12)),
+                ),
                 showlegend=True,
                 legend=dict(
                     orientation="h",
-                    yanchor="bottom", y=-0.15,
+                    yanchor="bottom", y=-0.05,
                     xanchor="center", x=0.5,
+                    font=dict(size=11),
                 ),
-                height=450,
+                height=420,
+                margin=dict(t=30, b=20, l=20, r=20),
             )
             st.plotly_chart(fig_radar, use_container_width=True)
 
         # CHART 3: Liniendiagramm Temperaturentwicklung der Top-Empfehlung
-        # X-Achse zeigt den Reisemonat plus Jahr (z.B. "August 2021").
+        # Bewusst kompakt gehalten und in eine schmale Spalte gepackt.
+        st.markdown("---")
         reise_monat_name = MONATSNAMEN[trip_start.month]
         st.subheader(
-            f"Temperaturentwicklung in {top['Destination']} im {reise_monat_name} "
-            f"(letzte Jahre)"
+            f"Temperaturentwicklung in {top['Destination']} im {reise_monat_name}"
         )
 
         with st.spinner("Lade historische Temperaturdaten..."):
@@ -436,7 +479,6 @@ with tab_ergebnis:
         else:
             jahre = sorted(temp_history.keys())
             werte = [temp_history[j] for j in jahre]
-            # X-Achsen-Labels: Monatsname + Jahr (z.B. "August 2021")
             labels = [f"{reise_monat_name} {j}" for j in jahre]
 
             fig_line = go.Figure()
@@ -446,43 +488,44 @@ with tab_ergebnis:
                 mode="lines+markers+text",
                 text=[f"{w}°C" for w in werte],
                 textposition="top center",
-                # Schriftgroesse der Datenbeschriftungen leicht erhoeht
-                # damit die Zahlen besser lesbar sind
-                textfont=dict(size=13, color="#333"),
-                line=dict(color="#3b82f6", width=3),
-                marker=dict(size=10),
+                textfont=dict(size=12, color="#333"),
+                line=dict(color=FARBE_TOP, width=2.5),
+                marker=dict(size=8, color=FARBE_TOP),
                 name="Ø Temperatur",
             ))
             fig_line.add_hline(
                 y=wunsch_temp,
                 line_dash="dash",
-                line_color="red",
+                line_color="#d65555",
                 annotation_text=f"Dein Wunsch: {wunsch_temp}°C",
                 annotation_position="right",
+                annotation_font=dict(size=10),
             )
 
-            # Y-Achsen-Bereich manuell setzen, damit oben Platz fuer die
-            # Datenbeschriftungen bleibt und nichts abgeschnitten wird.
-            # Ich nehme min/max der Werte und gebe oben/unten je 3 Grad
-            # Puffer (mit Wunsch-Temperatur als zusaetzlicher Referenz).
+            # Y-Achsen-Bereich mit Puffer, damit oben Platz fuer Labels bleibt
             alle_y_werte = werte + [wunsch_temp]
             y_min = min(alle_y_werte) - 3
-            y_max = max(alle_y_werte) + 4   # oben etwas mehr Puffer fuer Labels
+            y_max = max(alle_y_werte) + 4
 
             fig_line.update_layout(
                 xaxis_title="",
-                yaxis_title="Durchschnittstemperatur (°C)",
-                height=350,
-                yaxis=dict(range=[y_min, y_max]),
-                # margin oben erhoehen, damit der oberste Datenpunkt-Text
-                # nicht von der Plot-Grenze abgeschnitten wird
-                margin=dict(t=40, b=40, l=40, r=40),
+                yaxis_title="Ø Temperatur (°C)",
+                height=260,
+                yaxis=dict(range=[y_min, y_max], tickfont=dict(size=10)),
+                xaxis=dict(tickfont=dict(size=10)),
+                margin=dict(t=30, b=30, l=40, r=40),
             )
 
-            col_links, col_rechts = st.columns([2, 1])
+            # Linie in eine schmalere Spalte packen, damit das Diagramm
+            # nicht die ganze Breite einnimmt und kompakter wirkt
+            col_links, col_rechts = st.columns([3, 2])
             with col_links:
                 st.plotly_chart(fig_line, use_container_width=True)
 
+        # Tabelle als Backup, falls jemand die Rohdaten sehen will
         with st.expander("Alle Reiseziele als Tabelle anzeigen"):
-            st.dataframe(ergebnis, use_container_width=True)
-            
+            # Beschreibung der Uebersicht halber rauslassen, sonst wird
+            # die Tabelle sehr breit. Wenn ihr sie drinhaben wollt,
+            # einfach das drop() entfernen.
+            anzeige_df = ergebnis.drop(columns=["Beschreibung"], errors="ignore")
+            st.dataframe(anzeige_df, use_container_width=True)

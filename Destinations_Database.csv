@@ -1,51 +1,51 @@
-Destination,Land,Kategorie (Primär),Flugpreise,Sicherheitsindex,Flugzeit (ab ZRH)
-Lissabon,Portugal,Stadt / Meer,220,0.2,2.8
-Porto,Portugal,Stadt / Meer,240,0.2,2.7
-Faro,Portugal,Meer / Natur,260,0.2,3.0
-Madrid,Spanien,Stadt,180,2.7,2.2
-Barcelona,Spanien,Stadt / Meer,160,2.7,1.8
-Valencia,Spanien,Meer / Stadt,210,2.7,2.0
-Sevilla,Spanien,Stadt / Kultur,250,2.7,2.5
-Palma de Mallorca,Spanien,Meer,150,2.7,1.8
-Paris,Frankreich,Stadt,140,2.8,1.3
-Nizza,Frankreich,Meer / Stadt,180,2.8,1.2
-Lyon,Frankreich,Stadt / Kultur,160,2.8,1.0
-Bordeaux,Frankreich,Stadt / Natur,200,2.8,1.6
-Rom,Italien,Stadt / Kultur,170,4.6,1.5
-Mailand,Italien,Stadt / Mode,120,4.6,0.8
-Venedig,Italien,Stadt / Kultur,190,4.6,1.2
-Neapel,Italien,Stadt / Meer,160,4.6,1.8
-Palermo,Italien,Meer / Stadt,220,4.6,2.0
-Athen,Griechenland,Stadt / Kultur,240,3.1,2.7
-Santorini,Griechenland,Meer / Natur,350,3.1,3.0
-Heraklion (Kreta),Griechenland,Meer,280,3.1,3.0
-Valletta,Malta,Meer / Stadt,230,1.5,2.3
-Ljubljana,Slowenien,Stadt / Natur,210,0.2,1.0
-Wien,Österreich,Stadt,150,1.1,1.3
-Salzburg,Österreich,Berge / Stadt,180,1.1,1.0
-Innsbruck,Österreich,Berge / Natur,200,1.1,0.8
-Prag,Tschechien,Stadt,160,1.7,1.3
-Budapest,Ungarn,Stadt,150,1.5,1.7
-Warschau,Polen,Stadt,170,1.5,1.8
-Krakau,Polen,Stadt / Kultur,180,1.5,1.7
-Bratislava,Slowakei,Stadt,190,0.9,1.4
-Sofia,Bulgarien,Stadt / Berge,220,3.8,2.3
-Bukarest,Rumänien,Stadt,200,1.6,2.3
-Belgrad,Serbien,Stadt,210,4.4,1.8
-Tirana,Albanien,Stadt / Natur,250,4.5,2.0
-Split,Kroatien,Meer / Stadt,230,1.7,1.3
-Dubrovnik,Kroatien,Meer / Stadt,250,1.7,1.5
-Berlin,Deutschland,Stadt,130,2.6,1.3
-München,Deutschland,Stadt / Berge,140,2.6,0.8
-Hamburg,Deutschland,Stadt,140,2.6,1.5
-Amsterdam,Niederlande,Stadt,150,1.5,1.5
-Brüssel,Belgien,Stadt,140,2.6,1.2
-London,UK,Stadt,130,2.9,1.8
-Edinburgh,UK,Stadt / Natur,210,2.9,2.3
-Dublin,Irland,Stadt,180,1.8,2.3
-Kopenhagen,Dänemark,Stadt,160,0.8,1.7
-Stockholm,Schweden,Stadt / Natur,180,1.8,2.3
-Oslo,Norwegen,Natur / Stadt,200,1.1,2.3
-Bergen,Norwegen,Natur / Berge,240,1.1,2.5
-Helsinki,Finnland,Stadt / Natur,220,1.7,2.8
-Reykjavík,Island,Natur / Berge,400,0.3,3.7
+Destination	Land	Kategorie (Primär)	Flugpreise	Sicherheitsindex	Flugzeit (ab ZRH)	Beschreibung
+Lissabon	Portugal	Stadt / Meer	220	0.2	2.8	Portugals charmante Hauptstadt mit historischen Strassenbahnen, bunten Vierteln und Aussichtspunkten über den Tejo. Bekannt für Fado-Musik, frische Pastéis de Nata und entspannte Atlantik-Atmosphäre.
+Porto	Portugal	Stadt / Meer	240	0.2	2.7	Romantische Hafenstadt am Douro mit pastellfarbenen Häusern, weltberühmten Portweinkellern und der ikonischen Eisenbrücke Ponte Luís I. Perfekt für Geniesser und Architektur-Fans.
+Faro	Portugal	Meer / Natur	260	0.2	3.0	Tor zur Algarve mit goldenen Sandstränden, Lagunenlandschaft und mediterraner Altstadt. Ideal für Strandurlaub, Bootsausflüge und ruhiges Naturerlebnis.
+Madrid	Spanien	Stadt	180	2.7	2.2	Spaniens lebhafte Hauptstadt mit Weltklasse-Museen wie dem Prado, eleganten Plätzen und ausgeprägter Tapas- und Nachtkultur. Eine Stadt, die niemals schläft.
+Barcelona	Spanien	Stadt / Meer	160	2.7	1.8	Katalanische Metropole am Mittelmeer mit Gaudís Sagrada Família, kreativer Architektur und Stadtstränden. Mischung aus Kultur, Kulinarik und Strandfeeling.
+Valencia	Spanien	Meer / Stadt	210	2.7	2.0	Sonniges Mittelmeerziel mit futuristischer Stadt der Künste, langen Stränden und der Heimat der Paella. Familienfreundlich und entspannter als Barcelona.
+Sevilla	Spanien	Stadt / Kultur	250	2.7	2.5	Andalusisches Juwel mit maurischen Palästen, Flamenco-Tradition und der grössten gotischen Kathedrale der Welt. Im Frühling besonders bezaubernd.
+Palma de Mallorca	Spanien	Meer	150	2.7	1.8	Hauptstadt der Baleareninsel mit imposanter Kathedrale, malerischer Altstadt und unzähligen Buchten in der Umgebung. Klassisches Sonne-und-Meer-Ziel.
+Paris	Frankreich	Stadt	140	2.8	1.3	Die Stadt der Liebe mit Eiffelturm, Louvre und Champs-Élysées. Kulinarische Hauptstadt Europas und ein Muss für Kunst-, Mode- und Architekturfreunde.
+Nizza	Frankreich	Meer / Stadt	180	2.8	1.2	Glamouröse Perle der Côte d'Azur mit Promenade des Anglais, mildem Klima und mediterranem Flair. Ausgangspunkt für Ausflüge nach Monaco und Cannes.
+Lyon	Frankreich	Stadt / Kultur	160	2.8	1.0	Kulinarische Hauptstadt Frankreichs mit UNESCO-geschützter Altstadt, traditionellen Bouchons und römischer Geschichte. Geheimtipp zwischen Paris und der Provence.
+Bordeaux	Frankreich	Stadt / Natur	200	2.8	1.6	Weltbekannte Weinregion mit eleganter Innenstadt aus dem 18. Jahrhundert und der Garonne als Lebensader. Genuss pur für Wein- und Architekturliebhaber.
+Rom	Italien	Stadt / Kultur	170	4.6	1.5	Die Ewige Stadt mit Kolosseum, Vatikan und unzähligen historischen Schätzen an jeder Ecke. Ein Open-Air-Museum mit unvergleichlicher Pasta- und Pizzakultur.
+Mailand	Italien	Stadt / Mode	120	4.6	0.8	Italiens Mode- und Designhauptstadt mit gotischem Mailänder Dom, Da Vincis Abendmahl und exquisiten Boutiquen. Kosmopolitisch und stilbewusst.
+Venedig	Italien	Stadt / Kultur	190	4.6	1.2	Die einzigartige Lagunenstadt mit Kanälen, Gondeln und dem Markusplatz. Atemberaubend romantisch, besonders ausserhalb der Hochsaison.
+Neapel	Italien	Stadt / Meer	160	4.6	1.8	Lebhafte Stadt am Vesuv mit ursprünglichem süditalienischem Charakter, Weltklasse-Pizza und Pforte zu Pompeji und Capri. Authentisch und intensiv.
+Palermo	Italien	Meer / Stadt	220	4.6	2.0	Sizilianische Hauptstadt mit arabisch-normannischem Erbe, lebhaften Märkten und vielfältiger Strassenküche. Mischung aus Verfall und Schönheit.
+Athen	Griechenland	Stadt / Kultur	240	3.1	2.7	Wiege der westlichen Zivilisation mit Akropolis, antiken Tempeln und lebendiger Tavernen-Szene in Plaka. Geschichte trifft auf modernes Leben.
+Santorini	Griechenland	Meer / Natur	350	3.1	3.0	Postkartenmotiv der Kykladen mit weiss-blauen Häusern, dramatischer Caldera und legendären Sonnenuntergängen in Oia. Ikonisch für Verliebte.
+Heraklion (Kreta)	Griechenland	Meer	280	3.1	3.0	Hauptstadt Kretas mit dem antiken Knossos, langen Stränden und kretischer Küche. Idealer Ausgangspunkt für die grösste griechische Insel.
+Valletta	Malta	Meer / Stadt	230	1.5	2.3	Kleinste Hauptstadt der EU mit gut erhaltenen Festungsmauern, mediterranem Charme und kristallklarem Wasser. UNESCO-Welterbe auf engstem Raum.
+Ljubljana	Slowenien	Stadt / Natur	210	0.2	1.0	Charmante Hauptstadt im Grünen mit autofreier Altstadt, drachenverzierten Brücken und entspanntem Lebensgefühl. Geheimtipp für Naturliebhaber.
+Wien	Österreich	Stadt	150	1.1	1.3	Habsburgische Pracht mit Schloss Schönbrunn, Klassik-Konzerten und legendären Kaffeehäusern. Stadt der Walzer und der Sachertorte.
+Salzburg	Österreich	Berge / Stadt	180	1.1	1.0	Mozarts Geburtsstadt mit barocker Altstadt, Festung Hohensalzburg und alpinem Bergpanorama. Filmkulisse von Sound of Music.
+Innsbruck	Österreich	Berge / Natur	200	1.1	0.8	Tiroler Bergmetropole umringt von alpinen Gipfeln, mit goldener Dachl und perfektem Zugang zu Wander- und Skigebieten. Sportlich und urban zugleich.
+Prag	Tschechien	Stadt	160	1.7	1.3	Goldene Stadt mit der berühmten Karlsbrücke, Prager Burg und tausend Türmen. Märchenhafte Atmosphäre und beste Biere Mitteleuropas.
+Budapest	Ungarn	Stadt	150	1.5	1.7	Donau-Metropole mit imposantem Parlament, historischen Thermalbädern und schöner Mischung aus Buda und Pest. Bezahlbares Kultur- und Wellnessziel.
+Warschau	Polen	Stadt	170	1.5	1.8	Wiederauferstandene Hauptstadt mit rekonstruierter Altstadt, moderner Skyline und bewegter Geschichte. Lebendig und überraschend kosmopolitisch.
+Krakau	Polen	Stadt / Kultur	180	1.5	1.7	Polens kulturelles Herz mit dem grössten mittelalterlichen Marktplatz Europas, jüdischem Viertel Kazimierz und Nähe zu Auschwitz. Geschichte zum Anfassen.
+Bratislava	Slowakei	Stadt	190	0.9	1.4	Kompakte Hauptstadt an der Donau mit gut erhaltener Altstadt, Burg über der Stadt und entspanntem Tempo. Perfekt für ein verlängertes Wochenende.
+Sofia	Bulgarien	Stadt / Berge	220	3.8	2.3	Bulgariens Hauptstadt am Fusse des Vitosha-Gebirges, mit orthodoxen Kathedralen, römischen Ruinen und sehr günstigen Preisen. Authentisch und spannend.
+Bukarest	Rumänien	Stadt	200	1.6	2.3	Ehemals Klein-Paris des Ostens mit Belle-Époque-Architektur, riesigem Parlamentspalast und aufstrebender Café-Kultur. Mischung aus alt und neu.
+Belgrad	Serbien	Stadt	210	4.4	1.8	Lebendige Hauptstadt am Zusammenfluss von Save und Donau, bekannt für legendäres Nachtleben auf Splavovi-Booten. Roh, charmant und energiegeladen.
+Tirana	Albanien	Stadt / Natur	250	4.5	2.0	Bunte Hauptstadt im Aufbruch mit pastellbemalten Plattenbauten, lebhafter Café-Szene und unverbrauchtem Charakter. Albaniens dynamische Seite.
+Split	Kroatien	Meer / Stadt	230	1.7	1.3	Dalmatinische Küstenstadt rund um den antiken Diokletianpalast, mit klarem Adriawasser und Sprungbrett zu den nahen Inseln Hvar und Brač.
+Dubrovnik	Kroatien	Meer / Stadt	250	1.7	1.5	Perle der Adria mit komplett erhaltener Stadtmauer, mediterranem Flair und Game-of-Thrones-Kulissen. Touristisch, aber zu Recht weltberühmt.
+Berlin	Deutschland	Stadt	130	2.6	1.3	Pulsierende Hauptstadt mit Mauergeschichte, kreativer Szene und unzähligen Museen. Liberal, vielfältig und immer im Wandel.
+München	Deutschland	Stadt / Berge	140	2.6	0.8	Bayerische Hauptstadt mit Marienplatz, weltberühmtem Oktoberfest und Alpennähe. Mischung aus Tradition, Wirtschaftskraft und Lebensqualität.
+Hamburg	Deutschland	Stadt	140	2.6	1.5	Norddeutsche Hafenstadt mit beeindruckender Elbphilharmonie, Speicherstadt und maritimem Charme. Tor zur Welt mit nordischer Eleganz.
+Amsterdam	Niederlande	Stadt	150	1.5	1.5	Niederländische Hauptstadt mit malerischen Grachten, schmalen Giebelhäusern und liberaler Atmosphäre. Fahrradfreundlich und kunstreich.
+Brüssel	Belgien	Stadt	140	2.6	1.2	Hauptstadt der EU mit Grand-Place, Manneken Pis und legendärer Bier-, Schokoladen- und Fritten-Kultur. Multikulturell und unterschätzt.
+London	UK	Stadt	130	2.9	1.8	Weltmetropole mit Tower Bridge, Buckingham Palace und unzähligen Museen, viele davon gratis. Kosmopolitisch, traditionsreich und immer in Bewegung.
+Edinburgh	UK	Stadt / Natur	210	2.9	2.3	Schottische Hauptstadt mit dramatischer Burg auf dem Vulkanfelsen, mittelalterlicher Royal Mile und windumtosten Hügeln. Atmosphärisch und literarisch.
+Dublin	Irland	Stadt	180	1.8	2.3	Lebenslustige Hauptstadt Irlands mit Pub-Kultur in Temple Bar, Trinity College und herzlicher Gastfreundschaft. Literarisch und musikalisch.
+Kopenhagen	Dänemark	Stadt	160	0.8	1.7	Skandinavisches Designziel mit buntem Hafenviertel Nyhavn, Vergnügungspark Tivoli und Hygge-Atmosphäre. Fahrradstadt mit hoher Lebensqualität.
+Stockholm	Schweden	Stadt / Natur	180	1.8	2.3	Auf 14 Inseln gebautes Venedig des Nordens mit Königspalast, schönen Altstadtgassen und einzigartigem Schärengarten. Elegant und naturnah.
+Oslo	Norwegen	Natur / Stadt	200	1.1	2.3	Norwegische Hauptstadt am Fjord mit moderner Architektur, Wikinger-Geschichte und schnellem Zugang zu Wäldern und Seen. Skandinavisch sauber.
+Bergen	Norwegen	Natur / Berge	240	1.1	2.5	Tor zu den Fjorden mit historischem Hansaviertel Bryggen, sieben Bergen und maritimem Klima. Ausgangspunkt für die spektakulärsten Norwegen-Touren.
+Helsinki	Finnland	Stadt / Natur	220	1.7	2.8	Junge nordische Hauptstadt mit funktionalistischer Architektur, Saunakultur und Inseln vor der Tür. Designorientiert und überraschend grün.
+Reykjavík	Island	Natur / Berge	400	0.3	3.7	Nördlichste Hauptstadt der Welt mit bunten Häusern, geothermalen Quellen und Tor zu Vulkanen, Geysiren und Polarlichtern. Einzigartiges Naturerlebnis.
