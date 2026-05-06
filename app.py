@@ -13,6 +13,8 @@ from Feature_Temperatur_API import (
 )
 from Feature_Tagespreise_API import hole_tageskosten
 
+from Feature_KNN_ML import trainiere_und_evaluiere, vorhersage_match_score
+from Feature_Feedback_ML import speichere_feedback, anzahl_feedback
 
 TEMP_TOLERANZ = 5
 LOGO_PATH = "logo.png"
@@ -34,10 +36,17 @@ FARBE_REST = "#555555"         # Dunkelgrau fuer alle anderen Eintraege
 FARBE_WUNSCH = "#2d8a3e"       # Wunschprofil im Radar (gruen)
 FARBE_DESTINATION = "#555555"  # Destination im Radar (dunkelgrau)
 
+# Mindestanzahl Ergebnisse, bevor wir Constraints lockern (Fallback-Modus)
+MIN_ERGEBNISSE = 3
+
 # Wide-Layout, damit die zwei Charts auf der Auswertungs-Seite
 # nebeneinander Platz haben
 st.set_page_config(page_title="FitMyTrip", layout="wide", page_icon=LOGO_PATH)
 
+# --- ML-Modell Training pro Session (neues Feedback von User löscht Cahce und ML-Modell wird neu trainiert) ----------------
+@st.cache_resource(show_spinner="Trainiere ML-Modell...")
+def lade_ml_modell():
+    return trainiere_und_evaluiere()
 
 # --- Logo als Base64 einlesen (fuer die Animation gebraucht) ----------------
 @st.cache_data
@@ -55,7 +64,7 @@ logo_b64 = get_logo_base64()
 def lade_beschreibungen():
     if not CSV_PFAD.exists():
         return {}
-    df = pd.read_csv(CSV_PFAD, encoding="utf-8")
+    df = pd.read_csv(CSV_PFAD, sep="\t", encoding="utf-8")
     if "Beschreibung" not in df.columns:
         return {}
     return dict(zip(df["Destination"], df["Beschreibung"]))
@@ -63,8 +72,10 @@ def lade_beschreibungen():
 
 # --- Cached API-Wrapper -----------------------------------------------------
 @st.cache_data(show_spinner=False)
-def get_temperatur_cached(destination, start_str, end_str):
-    return hole_durchschnittstemperatur(destination, start_str, end_str)
+def get_temperaturen_batch_cached(destinationen_tuple, start_str, end_str):
+    return hole_temperaturen_batch_pro_jahr(
+        list(destinationen_tuple), start_str, end_str
+    )
 
 @st.cache_data(show_spinner=False)
 def get_tageskosten_cached(land):
@@ -76,7 +87,7 @@ def get_temperaturen_pro_jahr_cached(destination, start_str, end_str):
 
 
 # --- Match-Score-Logik ------------------------------------------------------
-def berechne_scores(row, wunsch_temp, budget, trip_duration_days):
+def berechne_sub_scores(row, wunsch_temp, budget, trip_duration_days):
     # Berechnet pro Reiseziel vier Einzelscores (jeweils 0-100%) und
     # daraus einen gleichgewichteten Gesamt-Match-Score.
 
@@ -103,8 +114,53 @@ def berechne_scores(row, wunsch_temp, budget, trip_duration_days):
         "Tagespreise": round(budget_score * 100, 1),
         "Sicherheit": round(safety_score * 100, 1),
         "Flugzeit": round(flight_score * 100, 1),
-        "Match-Score (%)": round(gesamt * 100, 1),
     }
+
+# Hard-Constraint-Fallback
+def filtere_mit_fallback(df, wunsch_temp, budget):
+    # Versucht zuerst die Original-Filter (Temp +/- 5, Budget exakt).
+    # Wenn weniger als MIN_ERGEBNISSE uebrig sind, lockert die App
+    # schrittweise: erst die Temperatur-Toleranz, dann das Budget.
+    fallback_meldung = None
+ 
+    # Stufe 0: Original-Constraints
+    df_filtered = df[
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - TEMP_TOLERANZ_STANDARD)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + TEMP_TOLERANZ_STANDARD)
+        & (df["Geschätzte Gesamtkosten (CHF)"] <= budget)
+    ]
+    if len(df_filtered) >= MIN_ERGEBNISSE:
+        return df_filtered, fallback_meldung
+ 
+    # Stufe 1: Temperatur-Toleranz auf +/-10
+    df_filtered = df[
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 10)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 10)
+        & (df["Geschätzte Gesamtkosten (CHF)"] <= budget)
+    ]
+    if len(df_filtered) >= MIN_ERGEBNISSE:
+        return df_filtered, "Temperatur-Toleranz auf ±10 °C erweitert"
+ 
+    # Stufe 2: Temperatur +/-15 + Budget +20%
+    df_filtered = df[
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 15)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 15)
+        & (df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.2)
+    ]
+    if len(df_filtered) >= MIN_ERGEBNISSE:
+        return df_filtered, (
+            "Temperatur-Toleranz auf ±15 °C erweitert und Budget um 20 % gelockert"
+        )
+ 
+    # Stufe 3: Letzte Reserve - Temperatur ignoriert, Budget +50%
+    df_filtered = df[df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.5]
+    if len(df_filtered) >= 1:
+        return df_filtered, (
+            "Temperatur-Limit ignoriert und Budget um 50 % gelockert "
+            "(deine Kriterien waren sehr streng)"
+        )
+ 
+    return df_filtered, "Selbst mit gelockerten Kriterien wenig gefunden"
 
 
 # --- Lade-Animation mit Logo ------------------------------------------------
@@ -236,13 +292,29 @@ with tab_input:
                 start_str = trip_start.strftime("%d.%m.%Y")
                 end_str = trip_end.strftime("%d.%m.%Y")
 
+                # Wetter-API im Batch: 5 API-Calls insgesamt statt 5 pro
+                # Destination. Open-Meteo akzeptiert mehrere Koordinaten
+                # in einem Request, wenn man sie kommagetrennt schickt.
+                destinationen = tuple(ergebnis["Destination"].tolist())
+                temp_data = get_temperaturen_batch_cached(
+                    destinationen, start_str, end_str
+                )
+                temp_durchschnitt = temp_data["durchschnitt"]
+ 
                 temperaturen, tageskosten = [], []
                 for _, row in ergebnis.iterrows():
-                    temperaturen.append(get_temperatur_cached(row["Destination"], start_str, end_str))
+                    temperaturen.append(temp_durchschnitt.get(row["Destination"]))
                     tageskosten.append(get_tageskosten_cached(row["Land"]))
-
+ 
                 ergebnis["Erwartete Temperatur (°C)"] = temperaturen
                 ergebnis["Tageskosten (CHF)"] = tageskosten
+ 
+                ergebnis["Geschätzte Gesamtkosten (CHF)"] = ergebnis.apply(
+                    lambda r: None
+                    if pd.isna(r["Tageskosten (CHF)"]) or pd.isna(r["Flugpreise"])
+                    else round(r["Flugpreise"] + r["Tageskosten (CHF)"] * trip_duration_days, 0),
+                    axis=1,
+                )
 
                 ergebnis["Geschätzte Gesamtkosten (CHF)"] = ergebnis.apply(
                     lambda r: None
@@ -256,22 +328,41 @@ with tab_input:
                     ergebnis["Erwartete Temperatur (°C)"].notna()
                     & ergebnis["Geschätzte Gesamtkosten (CHF)"].notna()
                 ]
-                # Temperatur-Match (innerhalb Toleranz)
-                ergebnis = ergebnis[
-                    (ergebnis["Erwartete Temperatur (°C)"] >= temperature - TEMP_TOLERANZ)
-                    & (ergebnis["Erwartete Temperatur (°C)"] <= temperature + TEMP_TOLERANZ)
-                ]
-                # Budget-Match
-                ergebnis = ergebnis[ergebnis["Geschätzte Gesamtkosten (CHF)"] <= budget]
 
-                # Match-Scores berechnen
+                # Soft-Filter mit Fallback
+                ergebnis, fallback_msg = filtere_mit_fallback(
+                    ergebnis, temperature, budget
+                )
+
+                # ML-Score berechnen
                 if len(ergebnis) > 0:
-                    scores_df = ergebnis.apply(
-                        lambda r: pd.Series(berechne_scores(r, temperature, budget, trip_duration_days)),
-                        axis=1,
-                    )
-                    ergebnis = pd.concat([ergebnis, scores_df], axis=1)
+                    ml_scores = []
+                    sub_scores_list = []
+                    for _, row in ergebnis.iterrows():
+                        score = vorhersage_match_score(
+                            modell=ml_data["modell"],
+                            scaler=ml_data["scaler"],
+                            feature_spalten=ml_data["feature_spalten"],
+                            wunsch_temp=temperature,
+                            budget=budget,
+                            reisetage=trip_duration_days,
+                            dest_temp=row["Erwartete Temperatur (°C)"],
+                            dest_tageskosten=row["Tageskosten (CHF)"],
+                            dest_sicherheit=row["Sicherheitsindex"],
+                            dest_flugzeit=row["Flugzeit (ab ZRH)"],
+                        )
+                        ml_scores.append(score)
+                        sub_scores_list.append(
+                            berechne_sub_scores(row, temperature, budget, trip_duration_days)
+                        )
+ 
+                    ergebnis["Match-Score (%)"] = ml_scores
+                    sub_df = pd.DataFrame(sub_scores_list, index=ergebnis.index)
+                    ergebnis = pd.concat([ergebnis, sub_df], axis=1)
                     ergebnis = ergebnis.sort_values("Match-Score (%)", ascending=False).reset_index(drop=True)
+ 
+            else:
+                fallback_msg = None
 
             lade_platzhalter.empty()
 
@@ -282,11 +373,20 @@ with tab_input:
             st.session_state["trip_start"] = trip_start
             st.session_state["trip_start_str"] = trip_start.strftime("%d.%m.%Y")
             st.session_state["trip_end_str"] = trip_end.strftime("%d.%m.%Y")
+            st.session_state["trip_duration_days"] = trip_duration_days
+            st.session_state["ml_data"] = ml_data
+            st.session_state["fallback_msg"] = fallback_msg
 
             if len(ergebnis) == 0:
                 st.warning("Leider haben wir kein passendes Reiseziel gefunden. Versuche, deine Kriterien zu lockern.")
             else:
-                st.success(f"{len(ergebnis)} passende Reiseziele gefunden. Wechsle jetzt oben auf den Tab **Auswertung**.")
+                if fallback_msg:
+                    st.info(
+                        f"Hinweis: Die Kriterien waren sehr streng. "
+                        f"Wir haben diese etwas gelockert ({fallback_msg}), "
+                        f"damit wir trotzdem Empfehlungen zeigen können."
+                    )
+                    st.success(f"{len(ergebnis)} passende Reiseziele gefunden. Wechsle jetzt oben auf den Tab **Auswertung**.")
 
 
 # ===========================================================================
@@ -305,6 +405,9 @@ with tab_ergebnis:
         trip_start = st.session_state["trip_start"]
         start_str = st.session_state["trip_start_str"]
         end_str = st.session_state["trip_end_str"]
+        trip_duration_days = st.session_state["trip_duration_days"]
+        ml_data = st.session_state["ml_data"]
+        fallback_msg = st.session_state.get("fallback_msg")
 
         st.title("Reiseziel-Finder – Deine persönliche Auswertung")
 
@@ -317,10 +420,17 @@ with tab_ergebnis:
             f"mit {top['Match-Score (%)']}% Übereinstimmung"
         )
 
+        if fallback_msg:
+            st.warning(
+                f"Hinweis: Wir haben die Kriterien gelockert, um Empfehlungen zu zeigen. "
+                f"Konkret: {fallback_msg}."
+            )
+
         # --- Beschreibung der Top-Destination -----------------------------
-        beschreibungen = lade_beschreibungen()
-        beschreibung_top = beschreibungen.get(top["Destination"])
-        if beschreibung_top:
+        beschreibung_top = top.get("Beschreibungen")
+        if not beschreibung_top or (isinstance(beschreibung_top, float) and pd.isna(beschreibung_top)):
+            beschreibungen_dict = lade_beschreibungen()
+            beschreibung_top = beschreibungen_dict.get(top["Destination"])
             st.markdown(
                 f"<div style='background-color:#f5f5f5; padding:18px 22px; "
                 f"border-left:4px solid {FARBE_TOP}; border-radius:4px; "
@@ -563,6 +673,177 @@ with tab_ergebnis:
                     f"wie zuverlässig die Temperaturen in diesem Reisezeitraum waren und wie "
                     f"gross die jährlichen Schwankungen sind."
                 )
+
+        # ====================================================================
+        # FEEDBACK-SEKTION
+        # ====================================================================
+        st.markdown("---")
+        st.subheader("Wie gut passt diese Empfehlung zu dir?")
+        st.markdown(
+            "Deine Bewertung hilft, das Modell zu verbessern. Beim nächsten Suchvorgang "
+            "fliessen alle bisherigen Bewertungen in die Empfehlungen ein."
+        )
+ 
+        col_fb1, col_fb2 = st.columns([2, 3])
+        with col_fb1:
+            sterne = st.slider(
+                f"Bewertung für {top['Destination']}",
+                min_value=1, max_value=5, value=3,
+                help="1 = passt nicht, 5 = perfekter Match",
+                key="feedback_sterne",
+            )
+            st.markdown(
+                f"<div style='font-size:24px; color:{FARBE_TOP}; "
+                f"letter-spacing: 4px; margin-top: -8px;'>"
+                f"{'★' * sterne}{'☆' * (5 - sterne)}</div>",
+                unsafe_allow_html=True,
+            )
+ 
+        with col_fb2:
+            st.write("")
+            if st.button("Bewertung speichern", key="speichere_feedback"):
+                eintrag = {
+                    "user_inputs": {
+                        "wunsch_temp": float(wunsch_temp),
+                        "budget": float(st.session_state["budget"]),
+                        "reisetage": int(trip_duration_days),
+                    },
+                    "destination": top["Destination"],
+                    "destination_features": {
+                        "dest_temp": float(top["Erwartete Temperatur (°C)"]),
+                        "dest_tageskosten": float(top["Tageskosten (CHF)"]),
+                        "dest_sicherheit": float(top["Sicherheitsindex"]),
+                        "dest_flugzeit": float(top["Flugzeit (ab ZRH)"]),
+                    },
+                    "rating_stars": int(sterne),
+                }
+                gesamt = speichere_feedback(eintrag)
+ 
+                # ML-Cache leeren -> Modell wird beim naechsten Suchvorgang
+                # mit dem neuen Feedback neu trainiert
+                lade_ml_modell.clear()
+ 
+                st.success(
+                    f"Bewertung gespeichert ({gesamt} Bewertungen insgesamt). "
+                    f"Beim nächsten Suchvorgang wird das Modell mit deinem Feedback "
+                    f"neu trainiert."
+                )
+ 
+        st.caption(
+            f"Bisher wurden insgesamt **{anzahl_feedback()}** Bewertungen gesammelt. "
+            f"Je mehr Feedback, desto besser werden die Empfehlungen."
+        )
+ 
+        # ====================================================================
+        # ML-PERFORMANCE-SEKTION (im Expander)
+        # ====================================================================
+        with st.expander("Technische Details: Performance unseres ML-Modells"):
+            st.markdown(
+                f"Unser KNN-Regressor (k = **{ml_data['bestes_k']}**) wurde auf "
+                f"**{ml_data['anzahl_trainingsdaten']} Trainings-** und "
+                f"**{ml_data['anzahl_testdaten']} Testbeispielen** evaluiert. "
+                f"Auf den Testdaten erreicht das Modell ein **R² von {ml_data['r2_final']}** "
+                f"und einen mittleren absoluten Fehler von **{ml_data['mae_final']} Prozentpunkten**. "
+                f"Davon sind **{ml_data['anzahl_feedback_eintraege']} echte User-Bewertungen** "
+                f"in das Training eingeflossen."
+            )
+ 
+            col_ml1, col_ml2 = st.columns(2)
+ 
+            with col_ml1:
+                st.markdown("**Hyperparameter-Tuning: bestes k finden**")
+ 
+                tuning = ml_data["tuning_ergebnisse"]
+                ks = [t["k"] for t in tuning]
+                r2s = [t["r2"] for t in tuning]
+                farben_k = [FARBE_TOP if k == ml_data["bestes_k"] else FARBE_REST for k in ks]
+ 
+                fig_tuning = go.Figure()
+                fig_tuning.add_trace(go.Scatter(
+                    x=ks, y=r2s,
+                    mode="lines",
+                    line=dict(color="#bbb", width=2),
+                    showlegend=False,
+                    hoverinfo="skip",
+                ))
+                fig_tuning.add_trace(go.Scatter(
+                    x=ks, y=r2s,
+                    mode="markers+text",
+                    marker=dict(size=14, color=farben_k,
+                                line=dict(color="white", width=2)),
+                    text=[f"{r:.3f}" for r in r2s],
+                    textposition="top center",
+                    textfont=dict(size=10, color="#333"),
+                    showlegend=False,
+                ))
+                fig_tuning.update_layout(
+                    xaxis=dict(
+                        title=dict(text="k (Anzahl Nachbarn)", font=dict(size=12)),
+                        tickvals=ks,
+                        tickfont=dict(size=10),
+                    ),
+                    yaxis=dict(
+                        title=dict(text="R² (auf Testdaten)", font=dict(size=12)),
+                        tickfont=dict(size=10),
+                    ),
+                    height=320,
+                    margin=dict(t=20, b=40, l=50, r=20),
+                )
+                st.plotly_chart(fig_tuning, use_container_width=True)
+ 
+                st.caption(
+                    f"Wir haben das Modell für verschiedene Werte von k trainiert "
+                    f"und R² auf dem Testset gemessen. Das beste k ist **{ml_data['bestes_k']}** "
+                    f"(grün hervorgehoben)."
+                )
+ 
+            with col_ml2:
+                st.markdown("**Vorhersagegenauigkeit: Vorhergesagt vs. Tatsächlich**")
+ 
+                y_test = ml_data["y_test"]
+                y_pred = ml_data["y_pred_test"]
+ 
+                fig_scatter = go.Figure()
+                fig_scatter.add_trace(go.Scatter(
+                    x=y_test, y=y_pred,
+                    mode="markers",
+                    marker=dict(
+                        size=8,
+                        color=FARBE_TOP,
+                        opacity=0.6,
+                        line=dict(color="white", width=1),
+                    ),
+                    name="Testbeispiele",
+                    showlegend=False,
+                ))
+                min_val = min(min(y_test), min(y_pred))
+                max_val = max(max(y_test), max(y_pred))
+                fig_scatter.add_trace(go.Scatter(
+                    x=[min_val, max_val], y=[min_val, max_val],
+                    mode="lines",
+                    line=dict(color="#d65555", dash="dash", width=2),
+                    name="Perfekte Vorhersage",
+                    showlegend=False,
+                ))
+                fig_scatter.update_layout(
+                    xaxis=dict(
+                        title=dict(text="Tatsächlicher Score (%)", font=dict(size=12)),
+                        tickfont=dict(size=10),
+                    ),
+                    yaxis=dict(
+                        title=dict(text="Vorhergesagter Score (%)", font=dict(size=12)),
+                        tickfont=dict(size=10),
+                    ),
+                    height=320,
+                    margin=dict(t=20, b=40, l=50, r=20),
+                )
+                st.plotly_chart(fig_scatter, use_container_width=True)
+ 
+                st.caption(
+                    "Jeder Punkt ist ein Testbeispiel. Die rote Linie zeigt, "
+                    "wo eine perfekte Vorhersage liegen würde."
+                )
+
 
         # Tabelle als Backup, falls jemand die Rohdaten sehen will
         with st.expander("Alle Reiseziele als Tabelle anzeigen"):

@@ -28,7 +28,7 @@ def filter_destinations(category, safety, flighttime, budget, trip_duration):
         pd.DataFrame: Gefilterte Destinationen
     """
 
-    df = pd.read_csv(csv_pfad, encoding="utf-8")
+    df = pd.read_csv(csv_pfad, sep="\t", encoding="utf-8")
     df_copy = df.copy()
 
     df_copy["daily_budget"] = (budget - df_copy["Flugpreise"]) / trip_duration
