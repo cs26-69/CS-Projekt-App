@@ -10,13 +10,14 @@ from Feature_Database import filter_destinations
 from Feature_Temperatur_API import (
     hole_durchschnittstemperatur,
     hole_temperaturen_pro_jahr,
+     hole_temperaturen_batch_pro_jahr,
 )
 from Feature_Tagespreise_API import hole_tageskosten
 
 from Feature_KNN_ML import trainiere_und_evaluiere, vorhersage_match_score
 from Feature_Feedback_ML import speichere_feedback, anzahl_feedback
 
-TEMP_TOLERANZ = 5
+TEMP_TOLERANZ_STANDARD = 5
 LOGO_PATH = "logo.png"
 
 # Pfad zur CSV - die brauchen wir auch hier, um die Beschreibung der
@@ -190,11 +191,10 @@ def zeige_lade_animation(platzhalter, text="Suche passende Reiseziele..."):
 
 # --- Logo-Header (kommt auf beiden Seiten) ----------------------------------
 def zeige_logo_header():
-    col_logo, col_text = st.columns([1, 5])
+    col_text, col_logo = st.columns([5, 1])
     with col_logo:
         if Path(LOGO_PATH).exists():
             st.image(LOGO_PATH, width=120)
-
 
 # --- Tabs als "Seiten" ------------------------------------------------------
 tab_input, tab_ergebnis = st.tabs(["Kriterien", "Auswertung"])
@@ -272,6 +272,7 @@ with tab_input:
             st.error("Bitte gib ein Budget grösser als 0 ein.")
         else:
             zeige_lade_animation(lade_platzhalter, "Suche passende Reiseziele...")
+            ml_data = lade_ml_modell() 
 
             ergebnis = filter_destinations(
                 category=category,
@@ -386,7 +387,10 @@ with tab_input:
                         f"Wir haben diese etwas gelockert ({fallback_msg}), "
                         f"damit wir trotzdem Empfehlungen zeigen können."
                     )
-                    st.success(f"{len(ergebnis)} passende Reiseziele gefunden. Wechsle jetzt oben auf den Tab **Auswertung**.")
+                    st.success(
+                        f"{len(ergebnis)} passende Reiseziele gefunden. "
+                        f"Wechsle jetzt oben auf den Tab **Auswertung**."
+                        )
 
 
 # ===========================================================================

@@ -25,7 +25,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error
 
-from Feature_Feedback import lade_feedback
+from Feature_Feedback_ML import lade_feedback
 
 
 CSV_PFAD = Path(__file__).parent / "Destinations_Database.csv"
@@ -68,7 +68,7 @@ def _wahrer_score(wunsch_temp, budget, reisetage,
 # ============================================================
 def generiere_synthetische_trainingsdaten(n=ANZAHL_TRAININGSBEISPIELE):
     rng = np.random.default_rng(RANDOM_SEED)
-    df = pd.read_csv(CSV_PFAD, encoding="utf-8")
+    df = pd.read_csv(CSV_PFAD, sep="\t", encoding="utf-8")
 
     laender_tageskosten = {
         "Schweiz": 170, "Norwegen": 145, "Island": 145, "Dänemark": 140,
