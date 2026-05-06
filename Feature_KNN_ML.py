@@ -68,7 +68,7 @@ def _wahrer_score(wunsch_temp, budget, reisetage,
 # ============================================================
 def generiere_synthetische_trainingsdaten(n=ANZAHL_TRAININGSBEISPIELE):
     rng = np.random.default_rng(RANDOM_SEED)
-    df = pd.read_csv(CSV_PFAD, encoding="utf-8")
+    df = pd.read_csv(CSV_PFAD, sep="\t", encoding="utf-8")
 
     laender_tageskosten = {
         "Schweiz": 170, "Norwegen": 145, "Island": 145, "Dänemark": 140,

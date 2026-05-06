@@ -1,0 +1,34 @@
+[
+  {
+    "user_inputs": {
+      "wunsch_temp": 24.0,
+      "budget": 600.0,
+      "reisetage": 4
+    },
+    "destination": "Lissabon",
+    "destination_features": {
+      "dest_temp": 20.6,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.8
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-06T11:25:15.247348"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 23.0,
+      "budget": 600.0,
+      "reisetage": 4
+    },
+    "destination": "Lissabon",
+    "destination_features": {
+      "dest_temp": 19.4,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.8
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-06T11:33:03.324861"
+  }
+]
