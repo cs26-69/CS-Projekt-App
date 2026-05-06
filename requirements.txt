@@ -1,2 +1,6 @@
 streamlit
 pandas
+plotly
+requests
+numpy
+scikit-learn
