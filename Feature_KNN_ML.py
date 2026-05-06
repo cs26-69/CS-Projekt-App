@@ -25,7 +25,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error
 
-from Feature_Feedback import lade_feedback
+from Feature_Feedback_ML import lade_feedback
 
 
 CSV_PFAD = Path(__file__).parent / "Destinations_Database.csv"
