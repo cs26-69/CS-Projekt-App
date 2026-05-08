@@ -30,5 +30,37 @@
     },
     "rating_stars": 5,
     "timestamp": "2026-05-06T11:33:03.324861"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 11.0,
+      "budget": 1500.0,
+      "reisetage": 2
+    },
+    "destination": "Porto",
+    "destination_features": {
+      "dest_temp": 16.0,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.7
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-07T12:41:11.187427"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": -20.0,
+      "budget": 10000.0,
+      "reisetage": 7
+    },
+    "destination": "Innsbruck",
+    "destination_features": {
+      "dest_temp": 2.9,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 0.8
+    },
+    "rating_stars": 2,
+    "timestamp": "2026-05-08T07:20:46.556375"
   }
 ]
