@@ -33,34 +33,34 @@
   },
   {
     "user_inputs": {
-      "wunsch_temp": 20.0,
-      "budget": 600.0,
-      "reisetage": 4
+      "wunsch_temp": 11.0,
+      "budget": 1500.0,
+      "reisetage": 2
     },
-    "destination": "Salzburg",
+    "destination": "Porto",
     "destination_features": {
-      "dest_temp": 12.9,
-      "dest_tageskosten": 110.0,
-      "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
+      "dest_temp": 16.0,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.7
     },
     "rating_stars": 5,
-    "timestamp": "2026-05-06T11:37:56.201008"
+    "timestamp": "2026-05-07T12:41:11.187427"
   },
   {
     "user_inputs": {
-      "wunsch_temp": 23.0,
-      "budget": 800.0,
-      "reisetage": 4
+      "wunsch_temp": -20.0,
+      "budget": 10000.0,
+      "reisetage": 7
     },
-    "destination": "Salzburg",
+    "destination": "Innsbruck",
     "destination_features": {
-      "dest_temp": 19.0,
+      "dest_temp": 2.9,
       "dest_tageskosten": 110.0,
       "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
+      "dest_flugzeit": 0.8
     },
-    "rating_stars": 3,
-    "timestamp": "2026-05-08T09:23:19.212021"
+    "rating_stars": 2,
+    "timestamp": "2026-05-08T07:20:46.556375"
   }
 ]
