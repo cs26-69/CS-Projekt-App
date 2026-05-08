@@ -1,3 +1,12 @@
+# ============================================================
+# Destinations-Filter fuer FitMyTrip
+# ============================================================
+# Liest die CSV mit allen moeglichen Reisezielen ein und filtert
+# sie nach den harten Kriterien des Users: Kategorie (Berge/Meer/
+# Stadt/Natur), Sicherheitsniveau, maximale Flugzeit und Budget.
+# Gibt die uebrig gebliebenen Destinationen als DataFrame zurueck,
+# damit die App damit weiterarbeiten kann.
+
 import pandas as pd
 from pathlib import Path
 

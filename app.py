@@ -1,3 +1,12 @@
+# ============================================================
+# FitMyTrip - Streamlit-App
+# ============================================================
+# Das ist die Hauptdatei der App. Hier ist die ganze Streamlit-
+# Oberflaeche drin: die zwei Tabs (Kriterien-Eingabe und
+# Auswertung), die Charts, die Feedback-Funktion und der ganze
+# Ablauf, wie aus den User-Inputs am Schluss eine Empfehlung wird.
+# Alle Module aus den anderen Feature-Dateien werden hier
+# zusammengefuehrt.
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go

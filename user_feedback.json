@@ -33,6 +33,35 @@
   },
   {
     "user_inputs": {
+      "wunsch_temp": 20.0,
+      "budget": 600.0,
+      "reisetage": 4
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 12.9,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-06T11:37:56.201008"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 23.0,
+      "budget": 800.0,
+      "reisetage": 4
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 19.0,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T09:23:19.212021"
       "wunsch_temp": 11.0,
       "budget": 1500.0,
       "reisetage": 2
@@ -62,85 +91,5 @@
     },
     "rating_stars": 2,
     "timestamp": "2026-05-08T07:20:46.556375"
-  },
-  {
-    "user_inputs": {
-      "wunsch_temp": 13.0,
-      "budget": 700.0,
-      "reisetage": 4
-    },
-    "destination": "Salzburg",
-    "destination_features": {
-      "dest_temp": 13.9,
-      "dest_tageskosten": 110.0,
-      "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
-    },
-    "rating_stars": 5,
-    "timestamp": "2026-05-08T11:40:24.430062"
-  },
-  {
-    "user_inputs": {
-      "wunsch_temp": 13.0,
-      "budget": 700.0,
-      "reisetage": 5
-    },
-    "destination": "Salzburg",
-    "destination_features": {
-      "dest_temp": 14.2,
-      "dest_tageskosten": 110.0,
-      "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
-    },
-    "rating_stars": 2,
-    "timestamp": "2026-05-08T11:49:24.459071"
-  },
-  {
-    "user_inputs": {
-      "wunsch_temp": 0.0,
-      "budget": 700.0,
-      "reisetage": 6
-    },
-    "destination": "Salzburg",
-    "destination_features": {
-      "dest_temp": 13.0,
-      "dest_tageskosten": 110.0,
-      "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
-    },
-    "rating_stars": 4,
-    "timestamp": "2026-05-08T11:52:29.411463"
-  },
-  {
-    "user_inputs": {
-      "wunsch_temp": 15.0,
-      "budget": 700.0,
-      "reisetage": 6
-    },
-    "destination": "Split",
-    "destination_features": {
-      "dest_temp": 17.9,
-      "dest_tageskosten": 95.4,
-      "dest_sicherheit": 1.7,
-      "dest_flugzeit": 1.3
-    },
-    "rating_stars": 5,
-    "timestamp": "2026-05-08T11:53:13.661299"
-  },
-  {
-    "user_inputs": {
-      "wunsch_temp": 27.0,
-      "budget": 10000.0,
-      "reisetage": 7
-    },
-    "destination": "Faro",
-    "destination_features": {
-      "dest_temp": 25.9,
-      "dest_tageskosten": 75.5,
-      "dest_sicherheit": 0.2,
-      "dest_flugzeit": 3.0
-    },
-    "rating_stars": 5,
-    "timestamp": "2026-05-08T11:55:42.848498"
   }
 ]
