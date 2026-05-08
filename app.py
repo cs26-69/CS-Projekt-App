@@ -117,13 +117,31 @@ def berechne_sub_scores(row, wunsch_temp, budget, trip_duration_days):
         "Flugzeit": round(flight_score * 100, 1),
     }
 
+def _lockerung_war_noetig(df_treffer, wunsch_temp, budget):
+    # Prueft, ob die Lockerung in den tatsaechlichen Treffern auch greift.
+    # Liefert True, sobald mind. ein Treffer ausserhalb der Stufe-0-Grenzen
+    # liegt (Temp ausserhalb wunsch_temp ±5 °C oder Kosten > budget).
+    # Wenn alle Treffer eh in den Stufe-0-Grenzen liegen, ist keine
+    # Fallback-Meldung noetig - die Lockerung diente dann nur dazu,
+    # MIN_ERGEBNISSE aufzufuellen.
+    max_temp_abw = (df_treffer["Erwartete Temperatur (°C)"] - wunsch_temp).abs().max()
+    if max_temp_abw > TEMP_TOLERANZ_STANDARD:
+        return True
+    if df_treffer["Geschätzte Gesamtkosten (CHF)"].max() > budget:
+        return True
+    return False
+
+
 # Hard-Constraint-Fallback
 def filtere_mit_fallback(df, wunsch_temp, budget):
     # Versucht zuerst die Original-Filter (Temp +/- 5, Budget exakt).
     # Wenn weniger als MIN_ERGEBNISSE uebrig sind, lockert die App
     # schrittweise: erst die Temperatur-Toleranz, dann das Budget.
+    # Eine Stufen-Meldung wird nur dann zurueckgegeben, wenn die Lockerung
+    # in den tatsaechlichen Treffern auch greift (mind. ein Treffer
+    # ausserhalb der Stufe-0-Grenzen).
     fallback_meldung = None
- 
+
     # Stufe 0: Original-Constraints
     df_filtered = df[
         (df["Erwartete Temperatur (°C)"] >= wunsch_temp - TEMP_TOLERANZ_STANDARD)
@@ -132,7 +150,7 @@ def filtere_mit_fallback(df, wunsch_temp, budget):
     ]
     if len(df_filtered) >= MIN_ERGEBNISSE:
         return df_filtered, fallback_meldung
- 
+
     # Stufe 1: Temperatur-Toleranz auf +/-10
     df_filtered = df[
         (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 10)
@@ -140,18 +158,20 @@ def filtere_mit_fallback(df, wunsch_temp, budget):
         & (df["Geschätzte Gesamtkosten (CHF)"] <= budget)
     ]
     if len(df_filtered) >= MIN_ERGEBNISSE:
-        return df_filtered, "Temperatur-Toleranz auf ±10 °C erweitert"
- 
-  # Stufe 2: Budget +20%, Temperatur wie in Stufe 1
+        if _lockerung_war_noetig(df_filtered, wunsch_temp, budget):
+            return df_filtered, "Temperatur-Toleranz auf ±10 °C erweitert"
+        return df_filtered, None
+
+    # Stufe 2: Budget +20%, Temperatur wie in Stufe 1
     df_filtered = df[
-        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 5)
-        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 5)
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 10)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 10)
         & (df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.2)
     ]
     if len(df_filtered) >= MIN_ERGEBNISSE:
-        return df_filtered, (
-            "Budget um 20 % gelockert"
-        )
+        if _lockerung_war_noetig(df_filtered, wunsch_temp, budget):
+            return df_filtered, "Budget um 20 % gelockert"
+        return df_filtered, None
 
     # Stufe 3: Temperatur-Toleranz auf ±15 °C erweitert, Budget weiterhin +20%
     df_filtered = df[
@@ -160,17 +180,31 @@ def filtere_mit_fallback(df, wunsch_temp, budget):
         & (df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.2)
     ]
     if len(df_filtered) >= MIN_ERGEBNISSE:
-        return df_filtered, (
-            "Temperatur-Toleranz auf ±15 °C erweitert und Budget um 20 % gelockert"
-        )
+        if _lockerung_war_noetig(df_filtered, wunsch_temp, budget):
+            return df_filtered, (
+                "Temperatur-Toleranz auf ±15 °C erweitert und Budget um 20 % gelockert"
+            )
+        return df_filtered, None
 
-    # Stufe 4: Letzte Reserve – Temperatur ignoriert, Budget +50%
+    # Stufe 4: Temperatur wie Stufe 3 (±15 °C), aber Budget +50 %
+    df_filtered = df[
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 15)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 15)
+        & (df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.5)
+    ]
+    if len(df_filtered) >= MIN_ERGEBNISSE:
+        if _lockerung_war_noetig(df_filtered, wunsch_temp, budget):
+            return df_filtered, "Budget um 50 % gelockert"
+        return df_filtered, None
+
+    # Stufe 5: Letzte Reserve – Temperatur ignoriert (Budget bleibt +50 %)
     df_filtered = df[df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.5]
     if len(df_filtered) >= 1:
-        return df_filtered, (
-            "Temperatur-Limit ignoriert und Budget um 50 % gelockert "
-            "(deine Kriterien waren sehr streng)"
-        )
+        if _lockerung_war_noetig(df_filtered, wunsch_temp, budget):
+            return df_filtered, (
+                "Temperatur-Limit ignoriert (deine Kriterien waren sehr streng)"
+            )
+        return df_filtered, None
 
     return df_filtered, "Selbst mit gelockerten Kriterien wenig gefunden"
 
@@ -405,13 +439,13 @@ with tab_input:
                 if fallback_msg:
                     st.info(
                         f"Hinweis: Die Kriterien waren sehr streng. "
-                        f"Wir haben diese etwas gelockert ({fallback_msg}), "
+                        f"Wir haben diese etwas gelockert, "
                         f"damit wir trotzdem Empfehlungen zeigen können."
                     )
-                    st.success(
-                        f"{len(ergebnis)} passende Reiseziele gefunden. "
-                        f"Wechsle jetzt oben auf den Tab **Auswertung**."
-                        )
+                st.success(
+                    f"{len(ergebnis)} passende Reiseziele gefunden. "
+                    f"Wechsle jetzt oben auf den Tab **Auswertung**."
+                    )
 
 
 # ===========================================================================
