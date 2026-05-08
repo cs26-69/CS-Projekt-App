@@ -46,5 +46,21 @@
     },
     "rating_stars": 5,
     "timestamp": "2026-05-06T11:37:56.201008"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 23.0,
+      "budget": 800.0,
+      "reisetage": 4
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 19.0,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T09:23:19.212021"
   }
 ]
