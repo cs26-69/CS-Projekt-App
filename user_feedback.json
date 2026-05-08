@@ -1,95 +1,434 @@
 [
   {
     "user_inputs": {
-      "wunsch_temp": 24.0,
-      "budget": 600.0,
-      "reisetage": 4
+      "wunsch_temp": 21.0,
+      "budget": 800.0,
+      "reisetage": 6
     },
-    "destination": "Lissabon",
+    "destination": "Ljubljana",
+    "destination_features": {
+      "dest_temp": 14.2,
+      "dest_tageskosten": 90.1,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:50:23.448616"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 21.0,
+      "budget": 1200.0,
+      "reisetage": 12
+    },
+    "destination": "Split",
+    "destination_features": {
+      "dest_temp": 19.7,
+      "dest_tageskosten": 95.4,
+      "dest_sicherheit": 1.7,
+      "dest_flugzeit": 1.3
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T15:51:38.530961"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 18.0,
+      "budget": 1200.0,
+      "reisetage": 12
+    },
+    "destination": "Ljubljana",
+    "destination_features": {
+      "dest_temp": 15.3,
+      "dest_tageskosten": 90.1,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T15:52:14.316029"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 18.0,
+      "budget": 800.0,
+      "reisetage": 12
+    },
+    "destination": "Faro",
     "destination_features": {
       "dest_temp": 20.6,
       "dest_tageskosten": 75.5,
       "dest_sicherheit": 0.2,
-      "dest_flugzeit": 2.8
+      "dest_flugzeit": 3.0
     },
-    "rating_stars": 5,
-    "timestamp": "2026-05-06T11:25:15.247348"
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:52:50.465911"
   },
   {
     "user_inputs": {
-      "wunsch_temp": 23.0,
-      "budget": 600.0,
-      "reisetage": 4
+      "wunsch_temp": 22.0,
+      "budget": 1100.0,
+      "reisetage": 9
     },
-    "destination": "Lissabon",
+    "destination": "Bratislava",
     "destination_features": {
-      "dest_temp": 19.4,
-      "dest_tageskosten": 75.5,
-      "dest_sicherheit": 0.2,
-      "dest_flugzeit": 2.8
+      "dest_temp": 19.8,
+      "dest_tageskosten": 91.3,
+      "dest_sicherheit": 0.9,
+      "dest_flugzeit": 1.4
     },
-    "rating_stars": 5,
-    "timestamp": "2026-05-06T11:33:03.324861"
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:53:46.831345"
   },
   {
     "user_inputs": {
-      "wunsch_temp": 20.0,
-      "budget": 600.0,
-      "reisetage": 4
+      "wunsch_temp": 17.0,
+      "budget": 1100.0,
+      "reisetage": 9
     },
     "destination": "Salzburg",
     "destination_features": {
-      "dest_temp": 12.9,
+      "dest_temp": 17.4,
       "dest_tageskosten": 110.0,
       "dest_sicherheit": 1.1,
       "dest_flugzeit": 1.0
     },
     "rating_stars": 5,
-    "timestamp": "2026-05-06T11:37:56.201008"
+    "timestamp": "2026-05-08T15:54:52.965092"
   },
   {
     "user_inputs": {
-      "wunsch_temp": 23.0,
-      "budget": 800.0,
-      "reisetage": 4
-    },
-    "destination": "Salzburg",
-    "destination_features": {
-      "dest_temp": 19.0,
-      "dest_tageskosten": 110.0,
-      "dest_sicherheit": 1.1,
-      "dest_flugzeit": 1.0
-    },
-    "rating_stars": 3,
-    "timestamp": "2026-05-08T09:23:19.212021"
-      "wunsch_temp": 11.0,
-      "budget": 1500.0,
-      "reisetage": 2
+      "wunsch_temp": 17.0,
+      "budget": 1300.0,
+      "reisetage": 9
     },
     "destination": "Porto",
     "destination_features": {
-      "dest_temp": 16.0,
+      "dest_temp": 18.4,
       "dest_tageskosten": 75.5,
       "dest_sicherheit": 0.2,
       "dest_flugzeit": 2.7
     },
     "rating_stars": 5,
-    "timestamp": "2026-05-07T12:41:11.187427"
+    "timestamp": "2026-05-08T15:55:25.581394"
   },
   {
     "user_inputs": {
-      "wunsch_temp": -20.0,
-      "budget": 10000.0,
+      "wunsch_temp": 17.0,
+      "budget": 1300.0,
+      "reisetage": 9
+    },
+    "destination": "Lissabon",
+    "destination_features": {
+      "dest_temp": 23.4,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.8
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T15:56:59.114406"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 12.0,
+      "budget": 1100.0,
       "reisetage": 7
+    },
+    "destination": "Lissabon",
+    "destination_features": {
+      "dest_temp": 17.7,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.8
+    },
+    "rating_stars": 1,
+    "timestamp": "2026-05-08T15:57:47.563008"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 12.0,
+      "budget": 1100.0,
+      "reisetage": 7
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 13.3,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:58:06.249228"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 9.0,
+      "budget": 1100.0,
+      "reisetage": 5
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 14.2,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:58:25.446777"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 9.0,
+      "budget": 1100.0,
+      "reisetage": 8
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 11.1,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T15:58:52.662397"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 9.0,
+      "budget": 1100.0,
+      "reisetage": 8
+    },
+    "destination": "Ljubljana",
+    "destination_features": {
+      "dest_temp": 11.6,
+      "dest_tageskosten": 90.1,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T15:59:15.744037"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 20.0,
+      "budget": 1100.0,
+      "reisetage": 9
+    },
+    "destination": "Ljubljana",
+    "destination_features": {
+      "dest_temp": 18.7,
+      "dest_tageskosten": 90.1,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T15:59:42.167313"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 20.0,
+      "budget": 1100.0,
+      "reisetage": 9
+    },
+    "destination": "Valletta",
+    "destination_features": {
+      "dest_temp": 28.2,
+      "dest_tageskosten": 88.7,
+      "dest_sicherheit": 1.5,
+      "dest_flugzeit": 2.3
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:00:10.449414"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 25.0,
+      "budget": 1100.0,
+      "reisetage": 8
+    },
+    "destination": "Lissabon",
+    "destination_features": {
+      "dest_temp": 22.5,
+      "dest_tageskosten": 75.5,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 2.8
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T16:00:35.293963"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 19.0,
+      "budget": 800.0,
+      "reisetage": 13
+    },
+    "destination": "Budapest",
+    "destination_features": {
+      "dest_temp": 24.6,
+      "dest_tageskosten": 71.8,
+      "dest_sicherheit": 1.5,
+      "dest_flugzeit": 1.7
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:02:51.115888"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 24.0,
+      "budget": 800.0,
+      "reisetage": 6
     },
     "destination": "Innsbruck",
     "destination_features": {
-      "dest_temp": 2.9,
+      "dest_temp": 21.9,
       "dest_tageskosten": 110.0,
       "dest_sicherheit": 1.1,
       "dest_flugzeit": 0.8
     },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:03:32.147667"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 2.0,
+      "budget": 900.0,
+      "reisetage": 7
+    },
+    "destination": "Ljubljana",
+    "destination_features": {
+      "dest_temp": 1.4,
+      "dest_tageskosten": 90.1,
+      "dest_sicherheit": 0.2,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:04:04.611910"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 2.0,
+      "budget": 900.0,
+      "reisetage": 7
+    },
+    "destination": "Split",
+    "destination_features": {
+      "dest_temp": 9.0,
+      "dest_tageskosten": 95.4,
+      "dest_sicherheit": 1.7,
+      "dest_flugzeit": 1.3
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T16:04:27.764410"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 17.0,
+      "budget": 2000.0,
+      "reisetage": 5
+    },
+    "destination": "Palma de Mallorca",
+    "destination_features": {
+      "dest_temp": 13.4,
+      "dest_tageskosten": 83.9,
+      "dest_sicherheit": 2.7,
+      "dest_flugzeit": 1.8
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:05:24.244295"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 7.0,
+      "budget": 2000.0,
+      "reisetage": 10
+    },
+    "destination": "Innsbruck",
+    "destination_features": {
+      "dest_temp": 1.5,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 0.8
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T16:05:52.697018"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 1.0,
+      "budget": 2000.0,
+      "reisetage": 12
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 1.2,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T16:06:14.647393"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 9.0,
+      "budget": 1800.0,
+      "reisetage": 12
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 1.2,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
+    "rating_stars": 4,
+    "timestamp": "2026-05-08T16:06:28.131886"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 9.0,
+      "budget": 1800.0,
+      "reisetage": 12
+    },
+    "destination": "Salzburg",
+    "destination_features": {
+      "dest_temp": 1.2,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 1.0
+    },
     "rating_stars": 2,
-    "timestamp": "2026-05-08T07:20:46.556375"
+    "timestamp": "2026-05-08T16:06:46.733020"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": 7.0,
+      "budget": 2100.0,
+      "reisetage": 7
+    },
+    "destination": "Bergen",
+    "destination_features": {
+      "dest_temp": -0.7,
+      "dest_tageskosten": 140.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 2.5
+    },
+    "rating_stars": 5,
+    "timestamp": "2026-05-08T16:07:38.793935"
+  },
+  {
+    "user_inputs": {
+      "wunsch_temp": -15.0,
+      "budget": 2100.0,
+      "reisetage": 7
+    },
+    "destination": "Innsbruck",
+    "destination_features": {
+      "dest_temp": 2.1,
+      "dest_tageskosten": 110.0,
+      "dest_sicherheit": 1.1,
+      "dest_flugzeit": 0.8
+    },
+    "rating_stars": 3,
+    "timestamp": "2026-05-08T16:08:15.948734"
   }
 ]
