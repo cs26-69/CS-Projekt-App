@@ -39,7 +39,7 @@ def filter_destinations(category, safety, flighttime, budget, trip_duration):
                         & (df_copy["Flugzeit (ab ZRH)"] <= flighttime)
                         & (df_copy["daily_budget"] >= 0)]
 
-    return df_filtered
+    return df_filtered.drop(columns=["daily_budget"])
 
 # Test-Block: läuft nur, wenn diese Datei direkt ausgeführt wird
 if __name__ == "__main__":

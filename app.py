@@ -142,7 +142,18 @@ def filtere_mit_fallback(df, wunsch_temp, budget):
     if len(df_filtered) >= MIN_ERGEBNISSE:
         return df_filtered, "Temperatur-Toleranz auf ±10 °C erweitert"
  
-    # Stufe 2: Temperatur +/-15 + Budget +20%
+  # Stufe 2: Budget +20%, Temperatur wie in Stufe 1
+    df_filtered = df[
+        (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 5)
+        & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 5)
+        & (df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.2)
+    ]
+    if len(df_filtered) >= MIN_ERGEBNISSE:
+        return df_filtered, (
+            "Budget um 20 % gelockert"
+        )
+
+    # Stufe 3: Temperatur-Toleranz auf ±15 °C erweitert, Budget weiterhin +20%
     df_filtered = df[
         (df["Erwartete Temperatur (°C)"] >= wunsch_temp - 15)
         & (df["Erwartete Temperatur (°C)"] <= wunsch_temp + 15)
@@ -152,17 +163,16 @@ def filtere_mit_fallback(df, wunsch_temp, budget):
         return df_filtered, (
             "Temperatur-Toleranz auf ±15 °C erweitert und Budget um 20 % gelockert"
         )
- 
-    # Stufe 3: Letzte Reserve - Temperatur ignoriert, Budget +50%
+
+    # Stufe 4: Letzte Reserve – Temperatur ignoriert, Budget +50%
     df_filtered = df[df["Geschätzte Gesamtkosten (CHF)"] <= budget * 1.5]
     if len(df_filtered) >= 1:
         return df_filtered, (
             "Temperatur-Limit ignoriert und Budget um 50 % gelockert "
             "(deine Kriterien waren sehr streng)"
         )
- 
-    return df_filtered, "Selbst mit gelockerten Kriterien wenig gefunden"
 
+    return df_filtered, "Selbst mit gelockerten Kriterien wenig gefunden"
 
 # --- Lade-Animation mit Logo ------------------------------------------------
 def zeige_lade_animation(platzhalter, text="Suche passende Reiseziele..."):
@@ -254,7 +264,7 @@ with tab_input:
     )
 
     trip_start = st.date_input("Bitte gib deinen gewünschten Startzeitpunkt ein:")
-    trip_end = st.date_input("Bitte gib deinen gewünschten Endzeitpunkt ein:")
+    trip_end = st.date_input("Bitte gib deinen gewünschten Endzeitpunkt ein: (Reisedauer von 2-21 Tagen möglich)")
     trip_duration_days = (trip_end - trip_start).days
 
     # Platzhalter fuer die Lade-Animation
@@ -268,6 +278,17 @@ with tab_input:
             st.error("Bitte wähle eine maximale Flugzeit aus.")
         elif trip_duration_days <= 0:
             st.error("Das Enddatum muss nach dem Startdatum liegen.")
+        elif trip_duration_days < 2:
+            st.error(
+            f"Die Reisedauer muss mindestens 2 Tage betragen. "
+            f"Aktuell sind es {trip_duration_days} Tag(e)."
+          )
+        elif trip_duration_days > 21:
+             st.error(
+             f"Die Reisedauer darf maximal 21 Tage betragen. "
+              f"Aktuell sind es {trip_duration_days} Tage. "
+             f"Bitte wähle einen kürzeren Zeitraum."
+           )
         elif budget <= 0:
             st.error("Bitte gib ein Budget grösser als 0 ein.")
         else:
@@ -278,7 +299,7 @@ with tab_input:
                 category=category,
                 safety=safety,
                 flighttime=flighttime_mapping[flighttime_label],
-                budget=10**9,
+                budget=budget,
                 trip_duration=trip_duration_days,
             )
 
@@ -500,7 +521,7 @@ with tab_ergebnis:
 
             # Beschreibung unter dem Chart
             st.caption(
-                "Diese Grafik zeigt die zehn Reiseziele mit der höchsten Übereinstimmung "
+                "Diese Grafik zeigt die top Reiseziele mit der höchsten Übereinstimmung "
                 "zu deinen Kriterien. Der grüne Balken markiert dein Top-Match, die anderen "
                 "Reiseziele sind grau dargestellt. Die Prozentzahl gibt an, wie gut das jeweilige "
                 "Reiseziel insgesamt zu deinen Wünschen passt (100% = perfekter Match)."
