@@ -1,3 +1,7 @@
+# Dateien und Ordner, die Git ignorieren soll - die landen NICHT im Repo.
+# Hier vor allem Python-Caches, virtuelle Environments und IDE-Kram,
+# der fuer das Projekt selbst nicht relevant ist.
+
 __pycache__/
 *.pyc
 .venv/
